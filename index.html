@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OraTree — Advanced Linktree Builder</title>
+  <meta name="description" content="Buat linktree profesional dengan 1000+ template premium. Gratis, mudah, dan powerful.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- ── LOADING OVERLAY ─────────────────────────────────────── -->
+<div id="loading-overlay">
+  <div class="loader-logo">OraTree</div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+  <div style="color:var(--text2);font-size:14px;margin-top:8px;">Memuat 1000+ template...</div>
+</div>
+
+<!-- ── TOAST ─────────────────────────────────────────────────── -->
+<div id="toast-container"></div>
+
+<!-- ── NAVBAR ────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <a class="nav-logo" onclick="handleLogoClick()">OraTree</a>
+  <div class="nav-links">
+    <span id="nav-user-area">
+      <button class="nav-btn" onclick="showAuthModal('login')">Masuk</button>
+      <button class="nav-btn primary" onclick="showAuthModal('register')">Daftar Gratis</button>
+    </span>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE: LANDING
+══════════════════════════════════════════════════════════ -->
+<div id="page-landing" class="page active">
+
+  <!-- Hero -->
+  <section class="hero-section">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span>✨</span> Platform Linktree Terbaik Indonesia
+      </div>
+      <h1 class="hero-title">
+        Satu Link<br><span>Untuk Segalanya</span>
+      </h1>
+      <p class="hero-sub">
+        Buat halaman link profesional dengan <strong>1000+ template premium</strong>.<br>
+        Desain kustomisasi penuh, musik, dan domain instanmu sendiri.
+      </p>
+      <div class="hero-cta">
+        <button class="btn btn-primary" onclick="showAuthModal('register')">
+          🚀 Mulai Gratis Sekarang
+        </button>
+        <button class="btn btn-secondary" onclick="showAuthModal('login')">
+          Sudah punya akun? Masuk
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-num">1200+</div>
+          <div class="hero-stat-label">Template Premium</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">100%</div>
+          <div class="hero-stat-label">Gratis Selamanya</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">∞</div>
+          <div class="hero-stat-label">Kustomisasi</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section style="padding:80px 40px;max-width:1100px;margin:0 auto;">
+    <h2 style="font-family:var(--font-main);font-size:42px;font-weight:800;text-align:center;margin-bottom:16px;">
+      Fitur <span style="background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Lengkap</span>
+    </h2>
+    <p style="text-align:center;color:var(--text2);font-size:17px;margin-bottom:60px;">Semua yang kamu butuhkan, ada di sini</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;">
+        <div style="font-size:40px;margin-bottom:16px;">🎨</div>
+        <h3 style="font-family:var(--font-main);font-size:22px;margin-bottom:8px;">1200+ Template</h3>
+        <p style="color:var(--text2);line-height:1.7;">Dari minimalis hingga neon, dark hingga pastel, retro hingga futuris. Semua tersedia dan langsung bisa dipakai.</p>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;">
+        <div style="font-size:40px;margin-bottom:16px;">✏️</div>
+        <h3 style="font-family:var(--font-main);font-size:22px;margin-bottom:8px;">Kustomisasi Penuh</h3>
+        <p style="color:var(--text2);line-height:1.7;">Ubah warna, font, gaya tombol, avatar, bio, dan background sesuai kepribadianmu.</p>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;">
+        <div style="font-size:40px;margin-bottom:16px;">🎵</div>
+        <h3 style="font-family:var(--font-main);font-size:22px;margin-bottom:8px;">Music Player</h3>
+        <p style="color:var(--text2);line-height:1.7;">Tambahkan lagu favorit ke halamanmu. Pengunjung bisa mendengar musik saat membuka linkmu.</p>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;">
+        <div style="font-size:40px;margin-bottom:16px;">🔗</div>
+        <h3 style="font-family:var(--font-main);font-size:22px;margin-bottom:8px;">Link Tak Terbatas</h3>
+        <p style="color:var(--text2);line-height:1.7;">Tambahkan sebanyak mungkin link, aktif/nonaktifkan, serta susun urutan sesuai keinginan.</p>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;">
+        <div style="font-size:40px;margin-bottom:16px;">🌐</div>
+        <h3 style="font-family:var(--font-main);font-size:22px;margin-bottom:8px;">Domain Sendiri</h3>
+        <p style="color:var(--text2);line-height:1.7;">Link publikmu: <strong style="color:var(--accent);">oratree.vercel.app/@username</strong> — sederhana dan mudah dibagikan.</p>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;">
+        <div style="font-size:40px;margin-bottom:16px;">📱</div>
+        <h3 style="font-family:var(--font-main);font-size:22px;margin-bottom:8px;">Mobile-First</h3>
+        <p style="color:var(--text2);line-height:1.7;">Tampilan sempurna di semua perangkat. Desain responsif untuk HP, tablet, dan desktop.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Template Preview -->
+  <section style="padding:60px 40px;background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+    <div style="max-width:1100px;margin:0 auto;text-align:center;">
+      <h2 style="font-family:var(--font-main);font-size:36px;font-weight:800;margin-bottom:48px;">
+        Beberapa Template Pilihan
+      </h2>
+      <div id="landing-template-preview" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;max-width:900px;margin:0 auto 40px;">
+        <!-- Generated by JS -->
+      </div>
+      <button class="btn btn-primary" onclick="showAuthModal('register')">
+        🎨 Lihat Semua 1200+ Template
+      </button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="padding:40px;text-align:center;color:var(--text2);font-size:14px;border-top:1px solid var(--border);">
+    <div style="font-family:var(--font-main);font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;">OraTree</div>
+    <p>Platform linktree terbaik Indonesia. Dibuat dengan ❤️</p>
+    <p style="margin-top:8px;">© 2025 OraTree. All rights reserved.</p>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAGE: DASHBOARD
+══════════════════════════════════════════════════════════ -->
+<div id="page-dashboard" class="page">
+  <div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div id="sidebar-content"></div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- OVERVIEW -->
+      <div class="dash-section active" id="dash-overview"></div>
+
+      <!-- LINKS -->
+      <div class="dash-section" id="dash-links"></div>
+
+      <!-- TEMPLATES -->
+      <div class="dash-section" id="dash-templates"></div>
+
+      <!-- DESIGN -->
+      <div class="dash-section" id="dash-design"></div>
+
+      <!-- MUSIC -->
+      <div class="dash-section" id="dash-music"></div>
+
+      <!-- PROFILE -->
+      <div class="dash-section" id="dash-profile"></div>
+
+      <!-- COMPLAINT -->
+      <div class="dash-section" id="dash-complaint"></div>
+
+      <!-- ADMIN OVERVIEW -->
+      <div class="dash-section" id="dash-admin-overview"></div>
+
+      <!-- ADMIN USERS -->
+      <div class="dash-section" id="dash-admin-users"></div>
+
+      <!-- ADMIN TICKETS -->
+      <div class="dash-section" id="dash-admin-tickets"></div>
+
+      <!-- ADMIN SONGS -->
+      <div class="dash-section" id="dash-admin-songs"></div>
+
+      <!-- ADMIN LINKS -->
+      <div class="dash-section" id="dash-admin-links"></div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════════════════ -->
+
+<!-- AUTH MODAL -->
+<div id="auth-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="modal-close" onclick="hideAuthModal()">✕</button>
+    <div id="login-form">
+      <div class="modal-title">Masuk ke OraTree</div>
+      <div class="modal-sub">Kelola linktree-mu</div>
+      <div class="form-tabs">
+        <div class="form-tab active" data-tab="login" onclick="switchAuthTab('login')">Masuk</div>
+        <div class="form-tab" data-tab="register" onclick="switchAuthTab('register')">Daftar</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" id="login-username" placeholder="username kamu" onkeydown="if(event.key==='Enter')handleLogin()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()">
+      </div>
+      <button class="btn btn-primary w-full" style="margin-top:8px;" onclick="handleLogin()">🚀 Masuk</button>
+    </div>
+    <div id="register-form" class="hidden">
+      <div class="modal-title">Daftar OraTree</div>
+      <div class="modal-sub">Buat akun gratis, tidak perlu kartu kredit</div>
+      <div class="form-tabs">
+        <div class="form-tab" data-tab="login" onclick="switchAuthTab('login')">Masuk</div>
+        <div class="form-tab active" data-tab="register" onclick="switchAuthTab('register')">Daftar</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Username <small style="color:var(--text2);font-weight:400;">(= URL linkmu)</small></label>
+        <input class="form-input" id="reg-username" placeholder="contoh: namakamu" style="font-family:'Space Mono',monospace;">
+        <small style="color:var(--text2);font-size:12px;margin-top:4px;display:block;">oratree.vercel.app/<strong id="reg-username-preview">namakamu</strong></small>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nama Tampilan</label>
+        <input class="form-input" id="reg-display" placeholder="Nama lengkap kamu">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="reg-password" placeholder="Minimal 6 karakter">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Konfirmasi Password</label>
+        <input class="form-input" type="password" id="reg-confirm" placeholder="Ulangi password">
+      </div>
+      <button class="btn btn-primary w-full" style="margin-top:8px;" onclick="handleRegister()">✨ Daftar Sekarang</button>
+    </div>
+  </div>
+</div>
+
+<!-- LINK MODAL -->
+<div id="link-modal" class="modal-overlay hidden">
+  <div class="modal modal-large">
+    <button class="modal-close" onclick="document.getElementById('link-modal').classList.add('hidden')">✕</button>
+    <div class="modal-title" id="link-modal-title">Tambah Link Baru</div>
+    <div class="tabs-row" style="margin-bottom:20px;">
+      <div class="tab-item active" onclick="switchLinkTab('basic',this)">📝 Info</div>
+      <div class="tab-item" onclick="switchLinkTab('icon',this)">😀 Ikon</div>
+      <div class="tab-item" onclick="switchLinkTab('social',this)">📱 Sosial</div>
+    </div>
+    <div class="tab-panels">
+      <div class="tab-panel active" id="link-tab-basic">
+        <div class="form-group">
+          <label class="form-label">Judul Link</label>
+          <input class="form-input" id="link-title-input" placeholder="Contoh: Instagram Saya">
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL</label>
+          <input class="form-input" id="link-url-input" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ikon Terpilih</label>
+          <div style="font-size:32px;padding:8px 0;" id="link-icon-display">🔗</div>
+        </div>
+      </div>
+      <div class="tab-panel" id="link-tab-icon">
+        <div class="form-group">
+          <label class="form-label">Pilih Ikon</label>
+          <div class="icon-grid" id="icon-grid"></div>
+        </div>
+      </div>
+      <div class="tab-panel" id="link-tab-social">
+        <div class="form-group">
+          <label class="form-label">Platform Populer</label>
+          <div class="social-preset-grid" id="social-preset-grid"></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:24px;">
+      <button class="btn btn-primary flex-1" onclick="saveLinkModal()">💾 Simpan Link</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('link-modal').classList.add('hidden')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN EDIT USER MODAL -->
+<div id="admin-edit-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('admin-edit-modal').classList.add('hidden')">✕</button>
+    <div class="modal-title">✏️ Edit Pengguna</div>
+    <div class="modal-sub">Ubah data pengguna (kosongkan jika tidak ingin mengubah)</div>
+    <div class="form-group">
+      <label class="form-label">Username Baru</label>
+      <input class="form-input" id="admin-edit-username" placeholder="username">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Display Name</label>
+      <input class="form-input" id="admin-edit-display" placeholder="Nama Tampilan">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password Baru</label>
+      <input class="form-input" type="password" id="admin-edit-password" placeholder="Kosongkan jika tidak ganti">
+    </div>
+    <div style="display:flex;gap:12px;margin-top:24px;">
+      <button class="btn btn-primary flex-1" onclick="saveAdminEditUser()">💾 Simpan</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('admin-edit-modal').classList.add('hidden')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SONG MODAL -->
+<div id="song-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('song-modal').classList.add('hidden')">✕</button>
+    <div class="modal-title">🎵 Tambah Lagu</div>
+    <div class="modal-sub">Lagu ini akan tersedia untuk semua pengguna</div>
+    <div class="form-group">
+      <label class="form-label">Judul Lagu</label>
+      <input class="form-input" id="song-title" placeholder="Judul lagu">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Artis / Penyanyi</label>
+      <input class="form-input" id="song-artist" placeholder="Nama artis">
+    </div>
+    <div class="form-group">
+      <label class="form-label">URL Audio (mp3/ogg)</label>
+      <input class="form-input" id="song-audio" placeholder="https://...mp3">
+    </div>
+    <div class="form-group">
+      <label class="form-label">URL Cover / Thumbnail</label>
+      <input class="form-input" id="song-cover" placeholder="https://...jpg">
+    </div>
+    <div style="display:flex;gap:12px;margin-top:24px;">
+      <button class="btn btn-primary flex-1" onclick="saveSong()">💾 Simpan Lagu</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('song-modal').classList.add('hidden')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- INFO MODAL -->
+<div id="info-modal" class="modal-overlay hidden">
+  <div class="modal modal-large">
+    <button class="modal-close" onclick="document.getElementById('info-modal').classList.add('hidden')">✕</button>
+    <div class="modal-title" id="info-modal-title"></div>
+    <div id="info-modal-body" style="margin-top:16px;max-height:400px;overflow-y:auto;"></div>
+    <button class="btn btn-ghost" style="margin-top:20px;" onclick="document.getElementById('info-modal').classList.add('hidden')">Tutup</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MUSIC PLAYER FAB (Dashboard)
+══════════════════════════════════════════════════════════ -->
+<div class="music-player-fab" id="music-player-fab" style="display:none;">
+  <div class="music-panel" id="music-panel">
+    <button onclick="closeMusicPanel()" style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text2);font-size:16px;cursor:pointer;">✕</button>
+    <img id="fab-cover" class="music-cover" src="https://via.placeholder.com/80" alt="cover">
+    <div class="music-title" id="fab-title">Pilih Lagu</div>
+    <div class="music-artist" id="fab-artist">—</div>
+    <div class="music-progress" id="fab-progress" onclick="seekAudio(event)">
+      <div class="music-progress-fill" id="fab-progress-fill" style="width:0%"></div>
+    </div>
+    <div class="music-time"><span id="fab-time-cur">0:00</span><span id="fab-time-tot">0:00</span></div>
+    <div class="music-controls">
+      <button class="music-ctrl-btn" onclick="skipAudio(-15)">⏮</button>
+      <button class="music-ctrl-btn main" id="fab-play-btn" onclick="toggleAudio()">▶</button>
+      <button class="music-ctrl-btn" onclick="skipAudio(15)">⏭</button>
+    </div>
+    <audio id="fab-audio" onended="onAudioEnd()" ontimeupdate="updateProgress()" onloadedmetadata="updateDuration()"></audio>
+  </div>
+  <button class="music-fab-btn" id="fab-btn" onclick="toggleMusicPanel()">🎵</button>
+</div>
+
+<script src="script.js"></script>
+<script>
+// ── EXTRA JS for index.html ──────────────────────────────────
+
+// Update username preview in register form
+document.addEventListener('DOMContentLoaded', () => {
+  const regInput = document.getElementById('reg-username');
+  if (regInput) {
+    regInput.addEventListener('input', function() {
+      const preview = document.getElementById('reg-username-preview');
+      if (preview) preview.textContent = this.value || 'namakamu';
+    });
+  }
+
+  // Landing template preview
+  setTimeout(() => {
+    const container = document.getElementById('landing-template-preview');
+    if (container && window.allTemplates) {
+      const sample = window.allTemplates.filter((_, i) => i % 20 === 0).slice(0, 24);
+      container.innerHTML = sample.map(t => {
+        const pal = t.palette;
+        const bgStyle = pal.bg.startsWith('linear') ? pal.bg : pal.bg;
+        const acc = pal.accent;
+        return `
+          <div style="border-radius:16px;overflow:hidden;aspect-ratio:9/16;background:${bgStyle};border:2px solid transparent;transition:all 0.3s;cursor:pointer;"
+               onclick="showAuthModal('register')"
+               onmouseover="this.style.transform='scale(1.05)';this.style.borderColor='${acc}'"
+               onmouseout="this.style.transform='';this.style.borderColor='transparent'">
+            <div style="display:flex;flex-direction:column;align-items:center;padding:16px 8px;height:100%;font-family:${t.font.heading};">
+              <div style="width:32px;height:32px;border-radius:50%;background:${acc};margin-bottom:6px;"></div>
+              <div style="font-size:8px;font-weight:700;color:${pal.text};margin-bottom:6px;text-align:center;">${t.name}</div>
+              ${[1,2,3].map(() => `<div style="width:90%;height:18px;border-radius:${t.btn.radius};background:${acc};margin-bottom:4px;opacity:0.9;"></div>`).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }, 100);
+});
+
+function handleLogoClick() {
+  if (window.currentUser) {
+    showPage('dashboard');
+  } else {
+    showPage('landing');
+  }
+}
+
+// Switch link tab
+function switchLinkTab(tab, el) {
+  document.querySelectorAll('#link-modal .tab-item').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#link-modal .tab-panel').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const panel = document.getElementById(`link-tab-${tab}`);
+  if (panel) panel.classList.add('active');
+}
+
+// Audio controls
+function toggleAudio() {
+  const audio = document.getElementById('fab-audio');
+  const btn = document.getElementById('fab-play-btn');
+  const fabBtn = document.getElementById('fab-btn');
+  if (audio.paused) {
+    audio.play();
+    btn.textContent = '⏸';
+    fabBtn.classList.add('playing');
+  } else {
+    audio.pause();
+    btn.textContent = '▶';
+    fabBtn.classList.remove('playing');
+  }
+}
+
+function skipAudio(sec) {
+  const audio = document.getElementById('fab-audio');
+  audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + sec));
+}
+
+function seekAudio(e) {
+  const audio = document.getElementById('fab-audio');
+  const bar = document.getElementById('fab-progress');
+  const pct = e.offsetX / bar.offsetWidth;
+  audio.currentTime = pct * (audio.duration || 0);
+}
+
+function updateProgress() {
+  const audio = document.getElementById('fab-audio');
+  const fill = document.getElementById('fab-progress-fill');
+  const cur = document.getElementById('fab-time-cur');
+  if (audio.duration) {
+    fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+    cur.textContent = formatTime(audio.currentTime);
+  }
+}
+
+function updateDuration() {
+  const audio = document.getElementById('fab-audio');
+  document.getElementById('fab-time-tot').textContent = formatTime(audio.duration || 0);
+}
+
+function onAudioEnd() {
+  document.getElementById('fab-play-btn').textContent = '▶';
+  document.getElementById('fab-btn').classList.remove('playing');
+  document.getElementById('fab-progress-fill').style.width = '0%';
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+// Init music fab when dashboard loads
+const origLoadDashboard = window.loadDashboard;
+// Extend to init music player
+</script>
+</body>
+</html>
