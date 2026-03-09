@@ -27,6 +27,193 @@ let selectedIcon = 'fas fa-link'; // Default Font Awesome icon
 let selectedButtonStyle = 'rounded';
 let adminEditUserId = null;
 
+// ===== FUNGSI UPLOAD (ditambahkan di awal) =====
+// Fungsi untuk menampilkan modal upload avatar
+function showUploadAvatarModal() {
+    const modal = document.getElementById('upload-avatar-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        // Reset input file
+        const fileInput = document.getElementById('avatar-file-input');
+        if (fileInput) fileInput.value = '';
+        // Reset preview
+        const preview = document.getElementById('avatar-preview');
+        if (preview) preview.style.display = 'none';
+    } else {
+        toast('Modal upload avatar tidak ditemukan', 'error');
+    }
+}
+
+// Fungsi untuk menampilkan modal upload musik
+function showUploadMusicModal() {
+    const modal = document.getElementById('upload-music-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        // Reset form
+        document.getElementById('upload-song-title').value = '';
+        document.getElementById('upload-song-artist').value = '';
+        document.getElementById('music-file-input').value = '';
+        document.getElementById('music-cover-input').value = '';
+        document.getElementById('music-cover-preview').innerHTML = '';
+    } else {
+        toast('Modal upload musik tidak ditemukan', 'error');
+    }
+}
+
+// Fungsi upload avatar (implementasi)
+async function uploadAvatar() {
+    const fileInput = document.getElementById('avatar-file-input');
+    if (!fileInput.files || fileInput.files.length === 0) {
+        toast('Pilih file foto terlebih dahulu', 'error');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    if (!file.type.startsWith('image/')) {
+        toast('File harus berupa gambar', 'error');
+        return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast('Ukuran file maksimal 5MB', 'error');
+        return;
+    }
+
+    // Tampilkan loading
+    toast('Mengupload avatar...', 'info');
+
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        const base64 = e.target.result;
+        try {
+            currentProfile.avatar = base64;
+            await db.from('links_oratree')
+                .update({ avatar: base64 })
+                .eq('type', 'user')
+                .eq('username', currentUser.username);
+            
+            document.getElementById('upload-avatar-modal').classList.add('hidden');
+            toast('Avatar berhasil diupload!', 'success');
+            
+            // Refresh profile section if open
+            if (document.getElementById('dash-profile').classList.contains('active')) {
+                loadProfileSection();
+            }
+        } catch (error) {
+            toast('Gagal upload avatar: ' + error.message, 'error');
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+// Fungsi upload musik (implementasi)
+async function uploadMusic() {
+    const title = document.getElementById('upload-song-title').value.trim();
+    const artist = document.getElementById('upload-song-artist').value.trim();
+    const musicFile = document.getElementById('music-file-input').files[0];
+    const coverFile = document.getElementById('music-cover-input').files[0];
+
+    if (!title || !artist) {
+        toast('Judul dan artis wajib diisi', 'error');
+        return;
+    }
+
+    if (!musicFile) {
+        toast('Pilih file audio terlebih dahulu', 'error');
+        return;
+    }
+
+    if (!musicFile.type.startsWith('audio/')) {
+        toast('File harus berupa audio (MP3, WAV, OGG)', 'error');
+        return;
+    }
+
+    if (musicFile.size > 10 * 1024 * 1024) { // 10MB limit
+        toast('Ukuran file audio maksimal 10MB', 'error');
+        return;
+    }
+
+    // Tampilkan loading
+    toast('Mengupload lagu...', 'info');
+
+    // Convert music to base64
+    const musicReader = new FileReader();
+    
+    musicReader.onload = async function(e) {
+        const musicBase64 = e.target.result;
+        
+        try {
+            // Handle cover if exists
+            if (coverFile) {
+                if (!coverFile.type.startsWith('image/')) {
+                    toast('File cover harus berupa gambar', 'error');
+                    return;
+                }
+                
+                const coverReader = new FileReader();
+                coverReader.onload = async function(ev) {
+                    const coverBase64 = ev.target.result;
+                    
+                    const songData = {
+                        id: Date.now().toString(),
+                        title: title,
+                        artist: artist,
+                        url: musicBase64,
+                        cover: coverBase64
+                    };
+                    
+                    currentProfile.music = songData;
+                    currentProfile.show_music = true;
+                    
+                    await db.from('links_oratree').update({ 
+                        music: JSON.stringify(songData),
+                        show_music: true 
+                    }).eq('type', 'user').eq('username', currentUser.username);
+                    
+                    document.getElementById('upload-music-modal').classList.add('hidden');
+                    toast('Lagu berhasil diupload! 🎵', 'success');
+                    
+                    // Refresh music section if open
+                    if (document.getElementById('dash-music').classList.contains('active')) {
+                        loadMusicSection();
+                    }
+                };
+                coverReader.readAsDataURL(coverFile);
+            } else {
+                // No cover
+                const songData = {
+                    id: Date.now().toString(),
+                    title: title,
+                    artist: artist,
+                    url: musicBase64,
+                    cover: 'https://via.placeholder.com/80'
+                };
+                
+                currentProfile.music = songData;
+                currentProfile.show_music = true;
+                
+                await db.from('links_oratree').update({ 
+                    music: JSON.stringify(songData),
+                    show_music: true 
+                }).eq('type', 'user').eq('username', currentUser.username);
+                
+                document.getElementById('upload-music-modal').classList.add('hidden');
+                toast('Lagu berhasil diupload! 🎵', 'success');
+                
+                // Refresh music section if open
+                if (document.getElementById('dash-music').classList.contains('active')) {
+                    loadMusicSection();
+                }
+            }
+        } catch (error) {
+            toast('Gagal upload lagu: ' + error.message, 'error');
+        }
+    };
+    
+    musicReader.readAsDataURL(musicFile);
+}
+
 // ─── TEMPLATE CATEGORIES & DATA ───────────────────────────────
 const TEMPLATE_CATEGORIES = [
   'all','minimalis','dark','neon','gradient','nature','retro','luxury',
@@ -399,6 +586,43 @@ function generatePreviewGradient(p) {
 document.addEventListener('DOMContentLoaded', async () => {
   allTemplates = generateTemplates();
   await initApp();
+  
+  // Event listener untuk preview avatar
+  const avatarInput = document.getElementById('avatar-file-input');
+  if (avatarInput) {
+    avatarInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          const preview = document.getElementById('avatar-preview');
+          if (preview) {
+            preview.src = ev.target.result;
+            preview.style.display = 'block';
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  // Event listener untuk preview cover musik
+  const musicCoverInput = document.getElementById('music-cover-input');
+  if (musicCoverInput) {
+    musicCoverInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          const preview = document.getElementById('music-cover-preview');
+          if (preview) {
+            preview.innerHTML = `<img src="${ev.target.result}" style="max-width: 100px; max-height: 100px; border-radius: 8px; border: 2px solid var(--accent);">`;
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
 });
 
 async function initApp() {
@@ -1035,7 +1259,7 @@ function renderDesignPanel() {
               </div>
             </div>
             <div class="form-group">
-                            <label class="form-label"><i class="fas fa-image"></i> Warna Background Custom</label>
+              <label class="form-label"><i class="fas fa-image"></i> Warna Background Custom</label>
               <div class="flex items-center gap-8">
                 <input type="color" value="${currentBg || '#0a0a0f'}" oninput="setCustomBg(this.value)" style="width:48px;height:36px;border:none;background:none;cursor:pointer;border-radius:8px;">
                 <input class="form-input" placeholder="#hex atau CSS gradient" value="${currentBg}" oninput="setCustomBg(this.value)" style="flex:1;">
@@ -1140,123 +1364,6 @@ async function saveBio() {
   currentProfile.bio = bio;
   await db.from('links_oratree').update({ bio }).eq('type', 'user').eq('username', currentUser.username);
   toast('Bio disimpan!', 'success');
-}
-
-// ─── UPLOAD FUNCTIONS ─────────────────────────────────────────
-async function uploadAvatar() {
-  const fileInput = document.getElementById('avatar-file-input');
-  if (!fileInput.files || fileInput.files.length === 0) {
-    toast('Pilih file foto terlebih dahulu', 'error');
-    return;
-  }
-
-  const file = fileInput.files[0];
-  if (!file.type.startsWith('image/')) {
-    toast('File harus berupa gambar', 'error');
-    return;
-  }
-
-  if (file.size > 5 * 1024 * 1024) { // 5MB limit
-    toast('Ukuran file maksimal 5MB', 'error');
-    return;
-  }
-
-  // Convert to base64 for demo (in production, upload to Supabase Storage)
-  const reader = new FileReader();
-  reader.onload = async function(e) {
-    const base64 = e.target.result;
-    currentProfile.avatar = base64;
-    await db.from('links_oratree').update({ avatar: base64 }).eq('type', 'user').eq('username', currentUser.username);
-    document.getElementById('upload-avatar-modal').classList.add('hidden');
-    toast('Avatar berhasil diupload!', 'success');
-    loadProfileSection();
-  };
-  reader.readAsDataURL(file);
-}
-
-async function uploadMusic() {
-  const title = document.getElementById('upload-song-title').value.trim();
-  const artist = document.getElementById('upload-song-artist').value.trim();
-  const musicFile = document.getElementById('music-file-input').files[0];
-  const coverFile = document.getElementById('music-cover-input').files[0];
-
-  if (!title || !artist) {
-    toast('Judul dan artis wajib diisi', 'error');
-    return;
-  }
-
-  if (!musicFile) {
-    toast('Pilih file audio terlebih dahulu', 'error');
-    return;
-  }
-
-  if (!musicFile.type.startsWith('audio/')) {
-    toast('File harus berupa audio', 'error');
-    return;
-  }
-
-  if (musicFile.size > 10 * 1024 * 1024) { // 10MB limit
-    toast('Ukuran file audio maksimal 10MB', 'error');
-    return;
-  }
-
-  // Convert to base64 for demo
-  const musicReader = new FileReader();
-  
-  musicReader.onload = async function(e) {
-    const musicBase64 = e.target.result;
-    
-    // Handle cover if exists
-    if (coverFile) {
-      const coverReader = new FileReader();
-      coverReader.onload = async function(ev) {
-        const coverBase64 = ev.target.result;
-        
-        const songData = {
-          id: Date.now().toString(),
-          title: title,
-          artist: artist,
-          url: musicBase64,
-          cover: coverBase64
-        };
-        
-        currentProfile.music = songData;
-        currentProfile.show_music = true;
-        
-        await db.from('links_oratree').update({ 
-          music: JSON.stringify(songData),
-          show_music: true 
-        }).eq('type', 'user').eq('username', currentUser.username);
-        
-        document.getElementById('upload-music-modal').classList.add('hidden');
-        toast('Lagu berhasil diupload! 🎵', 'success');
-        loadMusicSection();
-      };
-      coverReader.readAsDataURL(coverFile);
-    } else {
-      const songData = {
-        id: Date.now().toString(),
-        title: title,
-        artist: artist,
-        url: musicBase64,
-        cover: 'https://via.placeholder.com/80'
-      };
-      
-      currentProfile.music = songData;
-      currentProfile.show_music = true;
-      
-      await db.from('links_oratree').update({ 
-        music: JSON.stringify(songData),
-        show_music: true 
-      }).eq('type', 'user').eq('username', currentUser.username);
-      
-      document.getElementById('upload-music-modal').classList.add('hidden');
-      toast('Lagu berhasil diupload! 🎵', 'success');
-      loadMusicSection();
-    }
-  };
-  
-  musicReader.readAsDataURL(musicFile);
 }
 
 // ─── MUSIC SECTION ────────────────────────────────────────────
