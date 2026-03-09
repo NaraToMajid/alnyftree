@@ -1009,7 +1009,7 @@ function renderDesignPanel() {
           <div class="tab-panel" id="design-tab-fonts">
             <div class="font-options">
               ${FONT_OPTIONS.map(f => `
-                <div class="font-option ${currentFont === f.family ? 'selected' : ''}" onclick="setFont('${f.family.replace(/'/g,'\\'')}')">
+                <div class="font-option ${currentFont === f.family ? 'selected' : ''}" onclick="setFont('${f.family.replace(/'/g,'&#39;')}')">
                   <span style="font-family:${f.family};font-size:20px;">${f.display}</span>
                   <div class="font-option-name">${f.name}</div>
                 </div>
