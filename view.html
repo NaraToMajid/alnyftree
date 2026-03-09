@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OraTree</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Abril+Fatface&family=Bebas+Neue&family=Satisfy&family=Dancing+Script:wght@400;700&family=Permanent+Marker&family=Raleway:wght@100;200;300;400;500;600;700;800;900&family=Josefin+Sans:wght@100;300;400;600;700&family=Cinzel:wght@400;700;900&family=Fredoka+One&family=Righteous&family=Lobster&family=Pacifico&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* ─── BASE ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.5s;
+      font-family: 'DM Sans', sans-serif;
+      padding: 20px;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { border-radius: 99px; }
+
+    /* ─── BACKGROUND EFFECTS ────────────────────────────── */
+    .bg-dots {
+      background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .bg-lines {
+      background-image: repeating-linear-gradient(0deg, transparent, transparent 30px, rgba(255,255,255,0.04) 30px, rgba(255,255,255,0.04) 31px);
+    }
+    .bg-grid {
+      background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* ─── LOADING ───────────────────────────────────────── */
+    .page-loading {
+      position: fixed;
+      inset: 0;
+      background: #0a0a0f;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .page-loading .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 36px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #7c5cfc, #e040fb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .loading-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .loading-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #7c5cfc;
+      animation: dotBounce 1.4s ease-in-out infinite;
+    }
+    .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotBounce {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ─── MAIN CARD ─────────────────────────────────────── */
+    .linktree-container {
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: pageIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 1;
+    }
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── AVATAR ────────────────────────────────────────── */
+    .lt-avatar {
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+      margin-bottom: 16px;
+      flex-shrink: 0;
+    }
+    .avatar-circle { border-radius: 50%; }
+    .avatar-square { border-radius: 16px; }
+    .avatar-hexagon {
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    }
+    .avatar-squircle { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+
+    /* ─── NAME / BIO ────────────────────────────────────── */
+    .lt-name {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      text-align: center;
+      line-height: 1.2;
+    }
+    .lt-bio {
+      font-size: 14px;
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 28px;
+      max-width: 320px;
+      opacity: 0.75;
+    }
+
+    /* ─── LINK BUTTONS ──────────────────────────────────── */
+    .lt-links {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .lt-btn {
+      width: 100%;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      border: none;
+    }
+
+    .lt-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background 0.2s;
+    }
+    .lt-btn:hover::before { background: rgba(255,255,255,0.08); }
+    .lt-btn:active { transform: scale(0.97); }
+
+    .lt-btn .btn-icon { font-size: 20px; flex-shrink: 0; }
+    .lt-btn .btn-label { flex: 1; text-align: center; }
+
+    /* ─── BUTTON STYLES ─────────────────────────────────── */
+    .btn-style-pill { border-radius: 99px; }
+    .btn-style-rounded { border-radius: 14px; }
+    .btn-style-square { border-radius: 4px; }
+    .btn-style-sharp { border-radius: 0; }
+    .btn-style-outline-pill {
+      border-radius: 99px;
+      background: transparent !important;
+      border: 2px solid currentColor;
+    }
+    .btn-style-outline-rounded {
+      border-radius: 14px;
+      background: transparent !important;
+      border: 2px solid currentColor;
+    }
+    .btn-style-shadow {
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .btn-style-brutalist {
+      border-radius: 0;
+      border: 3px solid currentColor;
+      transform: translate(-3px, -3px);
+      box-shadow: 4px 4px 0 currentColor;
+    }
+    .btn-style-brutalist:hover {
+      transform: translate(0, 0);
+      box-shadow: 1px 1px 0 currentColor;
+    }
+    .btn-style-glass {
+      border-radius: 14px;
+      background: rgba(255,255,255,0.12) !important;
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    /* ─── MUSIC PLAYER ──────────────────────────────────── */
+    .music-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 100;
+    }
+    .music-fab-button {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .music-fab-button.playing {
+      animation: musicRotate 4s linear infinite;
+    }
+    @keyframes musicRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .music-popup {
+      position: absolute;
+      bottom: 64px;
+      right: 0;
+      width: 300px;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: none;
+      animation: popupIn 0.3s ease;
+    }
+    @keyframes popupIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .music-popup.open { display: block; }
+    .mp-cover {
+      width: 72px;
+      height: 72px;
+      border-radius: 12px;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 12px;
+    }
+    .mp-title { font-size: 15px; font-weight: 700; text-align: center; margin-bottom: 4px; }
+    .mp-artist { font-size: 12px; text-align: center; opacity: 0.7; margin-bottom: 16px; }
+    .mp-progress {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 99px;
+      cursor: pointer;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .mp-fill {
+      height: 100%;
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+    .mp-times { display: flex; justify-content: space-between; font-size: 11px; opacity: 0.6; margin-bottom: 14px; }
+    .mp-controls { display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .mp-btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: inherit;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .mp-btn:hover { background: rgba(255,255,255,0.2); }
+    .mp-btn.main {
+      width: 44px;
+      height: 44px;
+      font-size: 20px;
+    }
+
+    /* ─── NEON GLOW ─────────────────────────────────────── */
+    .neon-text {
+      text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 40px currentColor;
+    }
+    .neon-btn {
+      box-shadow: 0 0 12px var(--accent-color), 0 0 24px var(--accent-color);
+    }
+
+    /* ─── NOISE TEXTURE ─────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.25;
+    }
+
+    /* ─── 404 ────────────────────────────────────────────── */
+    .not-found {
+      text-align: center;
+      font-family: 'Syne', sans-serif;
+    }
+    .not-found h1 { font-size: 80px; font-weight: 800; color: #7c5cfc; }
+    .not-found p { color: rgba(255,255,255,0.6); margin-top: 8px; font-size: 18px; }
+    .not-found a {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 12px 28px;
+      background: #7c5cfc;
+      color: #fff;
+      border-radius: 99px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .not-found a:hover { background: #6a4de0; transform: translateY(-2px); }
+
+    /* ─── POWERED BY ────────────────────────────────────── */
+    .powered-by {
+      margin-top: 32px;
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.5;
+    }
+    .powered-by a {
+      color: inherit;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .powered-by a:hover { opacity: 1; }
+
+    @media (max-width: 480px) {
+      .lt-name { font-size: 20px; }
+      .lt-btn { padding: 14px 20px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body style="background:#0a0a0f;">
+
+<!-- Loading -->
+<div class="page-loading" id="page-loading">
+  <div class="logo">OraTree</div>
+  <div class="loading-dots">
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="linktree-container" id="linktree-content" style="display:none;"></div>
+
+<!-- Music FAB -->
+<div class="music-fab" id="music-fab" style="display:none;">
+  <div class="music-popup" id="music-popup">
+    <img class="mp-cover" id="mp-cover" src="" alt="cover">
+    <div class="mp-title" id="mp-title">—</div>
+    <div class="mp-artist" id="mp-artist">—</div>
+    <div class="mp-progress" id="mp-progress" onclick="seekMusic(event)">
+      <div class="mp-fill" id="mp-fill"></div>
+    </div>
+    <div class="mp-times"><span id="mp-cur">0:00</span><span id="mp-dur">0:00</span></div>
+    <div class="mp-controls">
+      <button class="mp-btn" onclick="skipMusic(-10)">⏮</button>
+      <button class="mp-btn main" id="mp-play-btn" onclick="toggleMusic()">▶</button>
+      <button class="mp-btn" onclick="skipMusic(10)">⏭</button>
+    </div>
+    <audio id="mp-audio"
+      onended="onMusicEnd()"
+      ontimeupdate="onMusicTime()"
+      onloadedmetadata="onMusicLoad()"></audio>
+  </div>
+  <button class="music-fab-button" id="music-fab-btn" onclick="toggleMusicPopup()">🎵</button>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://YOUR_SUPABASE_URL.supabase.co';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const BTN_STYLE_OPTIONS = {
+  'pill': { radius: '99px', outline: false, glass: false, brutalist: false, shadow: false },
+  'rounded': { radius: '14px', outline: false, glass: false, brutalist: false, shadow: false },
+  'square': { radius: '4px', outline: false, glass: false, brutalist: false, shadow: false },
+  'sharp': { radius: '0px', outline: false, glass: false, brutalist: false, shadow: false },
+  'outline-pill': { radius: '99px', outline: true, glass: false, brutalist: false, shadow: false },
+  'outline-rounded': { radius: '14px', outline: true, glass: false, brutalist: false, shadow: false },
+  'shadow': { radius: '14px', outline: false, glass: false, brutalist: false, shadow: true },
+  'brutalist': { radius: '0px', outline: false, glass: false, brutalist: true, shadow: false },
+  'glass': { radius: '14px', outline: false, glass: true, brutalist: false, shadow: false },
+};
+
+function safeJSON(str, fallback) {
+  try { return JSON.parse(str); } catch { return fallback; }
+}
+function formatTime(s) {
+  const m = Math.floor(s/60), sec = Math.floor(s%60);
+  return `${m}:${sec.toString().padStart(2,'0')}`;
+}
+
+// Get username from URL
+function getUsername() {
+  const path = window.location.pathname.replace(/^\//, '').replace(/\/$/, '');
+  return path || null;
+}
+
+async function loadPage() {
+  const username = getUsername();
+  if (!username || username === 'index.html' || username === 'view.html') {
+    window.location.href = '/';
+    return;
+  }
+
+  const { data, error } = await db.from('links_oratree')
+    .select('*')
+    .eq('type', 'user')
+    .eq('username', username)
+    .single();
+
+  document.getElementById('page-loading').style.display = 'none';
+
+  if (error || !data) {
+    renderNotFound(username);
+    return;
+  }
+
+  renderProfile(data);
+}
+
+function renderNotFound(username) {
+  document.body.style.background = '#0a0a0f';
+  document.body.style.color = '#ffffff';
+  document.getElementById('linktree-content').style.display = 'flex';
+  document.getElementById('linktree-content').innerHTML = `
+    <div class="not-found">
+      <h1>404</h1>
+      <p>Halaman <strong>@${username}</strong> tidak ditemukan.</p>
+      <a href="/">← Kembali ke OraTree</a>
+    </div>
+  `;
+}
+
+function renderProfile(data) {
+  const links = safeJSON(data.links, []);
+  const cfg = safeJSON(data.theme_config, {});
+  const music = safeJSON(data.music, null);
+  const templateId = data.template_id || 1;
+
+  // Build template config (simple inline, based on template_id seed)
+  const accent = cfg.accent || '#7c5cfc';
+  const fontFamily = cfg.font || "'Syne', sans-serif";
+  const btnStyle = cfg.btnStyle || 'pill';
+  const customBg = cfg.bg || '';
+  const show_music = data.show_music;
+
+  // Template-based background
+  const bgBase = getTemplateBg(templateId, accent, customBg);
+  const textColor = getTemplateTextColor(templateId, customBg);
+  const cardBg = getTemplateCardBg(templateId, accent);
+  const isNeon = isNeonTemplate(templateId);
+  const isGlass = isGlassTemplate(templateId);
+  const isBrutalist = isBrutalistTemplate(templateId);
+  const bgEffect = getTemplateBgEffect(templateId);
+
+  // Apply body styles
+  document.body.style.background = bgBase;
+  document.body.style.color = textColor;
+  document.body.style.fontFamily = fontFamily.replace(/font-family:/g,'');
+  if (bgEffect) document.body.classList.add(`bg-${bgEffect}`);
+  document.title = `${data.display_name || username} | OraTree`;
+
+  // Update scrollbar color
+  const style = document.createElement('style');
+  style.textContent = `
+    ::-webkit-scrollbar-thumb { background: ${accent}; }
+    ::-webkit-scrollbar-track { background: ${bgBase.startsWith('linear') ? 'rgba(0,0,0,0.3)' : bgBase}; }
+    ::selection { background: ${accent}44; }
+    .mp-fill { background: ${accent}; }
+    .music-fab-button { background: ${accent}; color: #fff; }
+    :root { --accent-color: ${accent}; }
+  `;
+  document.head.appendChild(style);
+
+  // Build active links only
+  const activeLinks = links.filter(l => l.active !== false);
+
+  // Render
+  const bso = BTN_STYLE_OPTIONS[btnStyle] || BTN_STYLE_OPTIONS['rounded'];
+  const avatarSrc = data.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.display_name||data.username)}&background=${accent.replace('#','')}&color=fff&size=90&bold=true`;
+
+  const avatarClass = getAvatarClass(templateId);
+  const avatarBorderStyle = isBrutalist ? `border:3px solid ${textColor};` : `border:3px solid ${accent};`;
+
+  const linksHtml = activeLinks.map(l => {
+    let btnClass = `lt-btn btn-style-${btnStyle}`;
+    let btnBg, btnColor, extraStyle = '';
+
+    if (bso.glass) {
+      btnBg = 'rgba(255,255,255,0.12)';
+      btnColor = textColor;
+      extraStyle = `backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.25);`;
+    } else if (bso.outline) {
+      btnBg = 'transparent';
+      btnColor = accent;
+      extraStyle = `border:2px solid ${accent};`;
+    } else if (isBrutalist) {
+      btnBg = accent;
+      btnColor = '#000';
+      extraStyle = `border:3px solid ${textColor};transform:translate(-3px,-3px);box-shadow:4px 4px 0 ${textColor};`;
+    } else if (bso.shadow) {
+      btnBg = accent;
+      btnColor = getContrastColor(accent);
+      extraStyle = `box-shadow:0 8px 24px ${accent}55;`;
+    } else {
+      btnBg = accent;
+      btnColor = getContrastColor(accent);
+    }
+
+    if (isNeon) {
+      extraStyle += `box-shadow:0 0 16px ${accent}, 0 0 32px ${accent}55;`;
+    }
+
+    return `
+      <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer"
+         class="${btnClass}"
+         style="background:${btnBg};color:${btnColor};${extraStyle}border-radius:${bso.radius};font-family:${fontFamily};">
+        <span class="btn-icon">${l.icon || '🔗'}</span>
+        <span class="btn-label">${escapeHtml(l.title)}</span>
+      </a>
+    `;
+  }).join('');
+
+  let nameStyle = `font-family:${fontFamily};color:${textColor};`;
+  if (isNeon) nameStyle += `text-shadow:0 0 10px ${accent},0 0 20px ${accent};`;
+
+  document.getElementById('linktree-content').style.display = 'flex';
+  document.getElementById('linktree-content').innerHTML = `
+    <img
+      class="lt-avatar ${avatarClass}"
+      src="${escapeHtml(avatarSrc)}"
+      style="${avatarBorderStyle}${isNeon ? `box-shadow:0 0 20px ${accent};` : ''}"
+      onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(data.display_name||'U')}&background=7c5cfc&color=fff&size=90'"
+      alt="avatar"
+    >
+    <div class="lt-name" style="${nameStyle}">${escapeHtml(data.display_name || data.username)}</div>
+    ${data.bio ? `<div class="lt-bio" style="color:${textColor};font-family:${fontFamily};">${escapeHtml(data.bio)}</div>` : '<div class="lt-bio" style="margin-bottom:28px;"></div>'}
+    <div class="lt-links">${linksHtml || '<p style="opacity:0.5;text-align:center;font-size:14px;">Belum ada link</p>'}</div>
+    <div class="powered-by" style="color:${textColor};">
+      Powered by <a href="/" style="color:${accent};">OraTree</a>
+    </div>
+  `;
+
+  // Music player
+  if (show_music && music && music.url) {
+    const fab = document.getElementById('music-fab');
+    fab.style.display = 'block';
+    document.getElementById('mp-cover').src = music.cover || 'https://via.placeholder.com/72';
+    document.getElementById('mp-title').textContent = music.title || 'Unknown';
+    document.getElementById('mp-artist').textContent = music.artist || '—';
+    document.getElementById('mp-audio').src = music.url;
+
+    // Style music popup to match theme
+    document.getElementById('music-popup').style.background = cardBg;
+    document.getElementById('music-popup').style.color = textColor;
+    document.getElementById('music-fab-btn').style.background = accent;
+    document.getElementById('music-fab-btn').style.color = getContrastColor(accent);
+  }
+}
+
+// ─── Template Helpers ────────────────────────────────────────
+function getTemplateBg(id, accent, customBg) {
+  if (customBg) return customBg;
+  const bgs = [
+    '#0a0a0f','#0d0d0d','#070712','#0f0f10','#0b0b12','#0e0e0e','#060609','#060a14',
+    '#03001e','#000a05','#050020','#0a1a00','#00101e','#1a0010',
+    '#ffffff','#fafafa','#f8f8f2','#fff9f5','#f5f8ff','#f4fff4','#fff5f5','#fffdf0',
+    'linear-gradient(135deg,#667eea 0%,#764ba2 100%)','linear-gradient(135deg,#f093fb 0%,#f5576c 100%)',
+    'linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)','linear-gradient(135deg,#43e97b 0%,#38f9d7 100%)',
+    'linear-gradient(135deg,#fa709a 0%,#fee140 100%)','linear-gradient(135deg,#a18cd1 0%,#fbc2eb 100%)',
+    'linear-gradient(135deg,#ffecd2 0%,#fcb69f 100%)','linear-gradient(135deg,#a1c4fd 0%,#c2e9fb 100%)',
+    '#1a2f0a','#0a2010','#f5f0e8','#e8f4e8','#f0e8d0','#0d1f0d',
+    '#fce4ec','#e8eaf6','#e0f7fa','#f3e5f5','#fff8e1','#e8f5e9',
+    '#2b1d0e','#1a0a2e','#0a1a0a','#f5e6c8','#fff0d8',
+    '#0a0803','#0d0d0d','#080810','#0a0a14','#f5f0e8',
+    'linear-gradient(135deg,#667eea,#764ba2)','linear-gradient(135deg,#00c6ff,#0072ff)',
+    'linear-gradient(135deg,#f093fb,#f5576c)','linear-gradient(135deg,#43e97b,#38f9d7)',
+    '#f5f500','#ff3300','#000000','#0000ff',
+    '#ffeef8','#e8f4ff','#fff0e0','#f0fff0',
+    '#001a40','#0a001a','#001a00','#1a0a00','#0a0020',
+    '#0a0014','#1a0000','#001420',
+    '#001f3f','#f8f4e8','#e8f4f8',
+    '#1a0020','#faf0e8','#0a0a0a',
+    '#000a20','#001400','#0d0d0d',
+    '#001a2e','#002040','#e8f8ff',
+    '#02001a','#000814','#080010',
+    '#f5e6c8','#f0e0c0','#e8dcc8',
+    '#fff5f8','#f5fff5','#fffbf0',
+    '#1a1a2e','#2d0028','#f0ece0',
+    '#ffffff','#000000','#f5f5f5',
+    '#fff3e0','#f1f8e9','#fce4ec',
+    '#0a0a0a','#f5f5f5','#888888',
+  ];
+  return bgs[(id - 1) % bgs.length];
+}
+
+function getTemplateTextColor(id, customBg) {
+  if (customBg) {
+    return customBg.includes('fff') || customBg.includes('f5f') || customBg.includes('faf') || customBg.includes('ffe') || customBg.includes('f0e') ? '#111' : '#fff';
+  }
+  const lights = [14,15,16,17,18,19,20,21,26,27,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103];
+  return lights.includes(id) ? '#111111' : '#ffffff';
+}
+
+function getTemplateCardBg(id, accent) {
+  const light = getTemplateTextColor(id, '');
+  if (light === '#111111') return 'rgba(0,0,0,0.08)';
+  return 'rgba(255,255,255,0.08)';
+}
+
+function isNeonTemplate(id) { return id >= 9 && id <= 14; }
+function isGlassTemplate(id) { return [38,39,40,41].includes(id); }
+function isBrutalistTemplate(id) { return [42,43,44,45].includes(id); }
+function getTemplateBgEffect(id) {
+  const effects = ['none','dots','lines','grid','waves','blobs','none','none'];
+  return effects[id % effects.length];
+}
+function getAvatarClass(id) {
+  const styles = ['circle','square','hexagon','squircle'];
+  return `avatar-${styles[id % styles.length]}`;
+}
+function getContrastColor(hex) {
+  try {
+    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    return (r*0.299 + g*0.587 + b*0.114) > 160 ? '#000000' : '#ffffff';
+  } catch { return '#ffffff'; }
+}
+function escapeHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Music Controls ──────────────────────────────────────────
+let musicOpen = false;
+function toggleMusicPopup() {
+  musicOpen = !musicOpen;
+  document.getElementById('music-popup').classList.toggle('open', musicOpen);
+}
+function toggleMusic() {
+  const a = document.getElementById('mp-audio');
+  const btn = document.getElementById('mp-play-btn');
+  const fab = document.getElementById('music-fab-btn');
+  if (a.paused) { a.play(); btn.textContent = '⏸'; fab.classList.add('playing'); }
+  else { a.pause(); btn.textContent = '▶'; fab.classList.remove('playing'); }
+}
+function skipMusic(s) {
+  const a = document.getElementById('mp-audio');
+  a.currentTime = Math.max(0, Math.min(a.duration||0, a.currentTime + s));
+}
+function seekMusic(e) {
+  const a = document.getElementById('mp-audio');
+  const bar = document.getElementById('mp-progress');
+  a.currentTime = (e.offsetX / bar.offsetWidth) * (a.duration||0);
+}
+function onMusicTime() {
+  const a = document.getElementById('mp-audio');
+  if (a.duration) {
+    document.getElementById('mp-fill').style.width = (a.currentTime / a.duration * 100) + '%';
+    document.getElementById('mp-cur').textContent = formatTime(a.currentTime);
+  }
+}
+function onMusicLoad() {
+  document.getElementById('mp-dur').textContent = formatTime(document.getElementById('mp-audio').duration||0);
+}
+function onMusicEnd() {
+  document.getElementById('mp-play-btn').textContent = '▶';
+  document.getElementById('music-fab-btn').classList.remove('playing');
+}
+
+// ─── Init ────────────────────────────────────────────────────
+loadPage();
+</script>
+</body>
+</html>
