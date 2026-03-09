@@ -1,5 +1,5 @@
 /* ============================================================
-   ORATREE — Advanced Linktree Builder
+   ALNYFTREE — Advanced Linktree Builder
    script.js — Main Application Logic
    ============================================================ */
 
@@ -23,7 +23,7 @@ let isPlaying = false;
 let musicInterval = null;
 let complainType = 'saran';
 let editingLinkId = null;
-let selectedIconEmoji = '🔗';
+let selectedIcon = 'fas fa-link'; // Default Font Awesome icon
 let selectedButtonStyle = 'rounded';
 let adminEditUserId = null;
 
@@ -35,8 +35,105 @@ const TEMPLATE_CATEGORIES = [
   'vintage','floral','monochrome'
 ];
 
+// ─── FONT AWESOME ICONS ───────────────────────────────────────
+const FONT_AWESOME_ICONS = [
+  'fas fa-link', 'fas fa-globe', 'fas fa-mobile-alt', 'fas fa-laptop', 'fas fa-envelope',
+  'fab fa-instagram', 'fab fa-facebook', 'fab fa-twitter', 'fab fa-youtube', 'fab fa-tiktok',
+  'fab fa-whatsapp', 'fab fa-telegram', 'fab fa-discord', 'fab fa-github', 'fab fa-linkedin',
+  'fab fa-spotify', 'fab fa-soundcloud', 'fab fa-apple', 'fab fa-google', 'fab fa-amazon',
+  'fas fa-shopping-cart', 'fas fa-store', 'fas fa-dollar-sign', 'fas fa-credit-card',
+  'fas fa-music', 'fas fa-headphones', 'fas fa-podcast', 'fas fa-video', 'fas fa-film',
+  'fas fa-camera', 'fas fa-image', 'fas fa-paint-brush', 'fas fa-pen', 'fas fa-book',
+  'fas fa-graduation-cap', 'fas fa-school', 'fas fa-university', 'fas fa-chart-line',
+  'fas fa-chart-bar', 'fas fa-chart-pie', 'fas fa-calculator', 'fas fa-clock',
+  'fas fa-calendar', 'fas fa-bell', 'fas fa-heart', 'fas fa-star', 'fas fa-fire',
+  'fas fa-bolt', 'fas fa-cloud', 'fas fa-sun', 'fas fa-moon', 'fas fa-tree',
+  'fas fa-leaf', 'fas fa-seedling', 'fas fa-flower', 'fas fa-paw', 'fas fa-cat',
+  'fas fa-dog', 'fas fa-hippo', 'fas fa-fish', 'fas fa-dragon', 'fas fa-robot',
+  'fas fa-gamepad', 'fas fa-chess', 'fas fa-dice', 'fas fa-crown', 'fas fa-gem',
+  'fas fa-coffee', 'fas fa-utensils', 'fas fa-pizza', 'fas fa-hamburger', 'fas fa-beer',
+  'fas fa-cocktail', 'fas fa-wine-glass', 'fas fa-glass-cheers', 'fas fa-bus',
+  'fas fa-car', 'fas fa-plane', 'fas fa-train', 'fas fa-bicycle', 'fas fa-walking',
+  'fas fa-running', 'fas fa-swimmer', 'fas fa-basketball-ball', 'fas fa-football-ball',
+  'fas fa-volleyball-ball', 'fas fa-baseball-ball', 'fas fa-golf-ball', 'fas fa-table-tennis',
+  'fas fa-bowling-ball', 'fas fa-medal', 'fas fa-trophy', 'fas fa-award', 'fas fa-ribbon'
+];
+
+const EMOJI_ICONS = [
+  '🔗','🌐','📱','💻','📧','📷','📸','🎵','🎬','📺',
+  '🐦','📘','📷','▶️','💼','🐙','📌','💬','✈️','🎶',
+  '🎮','🎯','📝','📚','🎨','🏆','💡','🔥','⭐','💎',
+  '🚀','🌟','🎪','🎭','🎤','🎧','🖥️','📡','🛒','💰',
+  '🎁','🏠','🚗','✈️','🌍','❤️','💙','💚','💜','🧡',
+  '💛','🤍','🖤','🤎','💗','💖','👤','👥','🤝','💪',
+  '🙌','👏','✌️','🤙','👌','🔑','🔒','🔓','⚙️','🛠️',
+  '📊','📈','📉','💹','🗓️','⏰','📌','📍','🗺️','🧭',
+  '🏅','🥇','🥈','🥉','🎖️','🏵️','🎫','🎟️','🎪','🎭',
+  '🎨','🎬','🎤','🎧','🎼','🎹','🥁','🎷','🎸','🎺'
+];
+
+const SOCIAL_PRESETS = [
+  { icon:'fab fa-instagram', label:'Instagram', prefix:'https://instagram.com/' },
+  { icon:'fab fa-facebook', label:'Facebook', prefix:'https://facebook.com/' },
+  { icon:'fab fa-twitter', label:'Twitter/X', prefix:'https://x.com/' },
+  { icon:'fab fa-youtube', label:'YouTube', prefix:'https://youtube.com/@' },
+  { icon:'fab fa-linkedin', label:'LinkedIn', prefix:'https://linkedin.com/in/' },
+  { icon:'fab fa-tiktok', label:'TikTok', prefix:'https://tiktok.com/@' },
+  { icon:'fab fa-whatsapp', label:'WhatsApp', prefix:'https://wa.me/' },
+  { icon:'fab fa-telegram', label:'Telegram', prefix:'https://t.me/' },
+  { icon:'fab fa-github', label:'GitHub', prefix:'https://github.com/' },
+  { icon:'fab fa-spotify', label:'Spotify', prefix:'https://open.spotify.com/user/' },
+  { icon:'fab fa-discord', label:'Discord', prefix:'https://discord.gg/' },
+  { icon:'fab fa-snapchat', label:'Snapchat', prefix:'https://snapchat.com/add/' },
+  { icon:'fab fa-pinterest', label:'Pinterest', prefix:'https://pinterest.com/' },
+  { icon:'fab fa-medium', label:'Medium', prefix:'https://medium.com/@' },
+  { icon:'fab fa-twitch', label:'Twitch', prefix:'https://twitch.tv/' },
+  { icon:'fas fa-envelope', label:'Email', prefix:'mailto:' },
+  { icon:'fas fa-globe', label:'Website', prefix:'https://' },
+  { icon:'fas fa-store', label:'Toko Online', prefix:'https://' },
+  { icon:'fas fa-music', label:'Musik', prefix:'https://' },
+  { icon:'fas fa-video', label:'Video', prefix:'https://' }
+];
+
+const FONT_OPTIONS = [
+  { name: 'Syne', display: 'Syne', family: "'Syne', sans-serif" },
+  { name: 'Playfair Display', display: 'Playfair', family: "'Playfair Display', serif" },
+  { name: 'Bebas Neue', display: 'BEBAS NEUE', family: "'Bebas Neue', cursive" },
+  { name: 'Abril Fatface', display: 'Abril Fatface', family: "'Abril Fatface', cursive" },
+  { name: 'Josefin Sans', display: 'Josefin Sans', family: "'Josefin Sans', sans-serif" },
+  { name: 'Cinzel', display: 'Cinzel', family: "'Cinzel', serif" },
+  { name: 'Space Mono', display: 'Space Mono', family: "'Space Mono', monospace" },
+  { name: 'Righteous', display: 'Righteous', family: "'Righteous', cursive" },
+  { name: 'Lobster', display: 'Lobster', family: "'Lobster', cursive" },
+  { name: 'Pacifico', display: 'Pacifico', family: "'Pacifico', cursive" },
+  { name: 'Dancing Script', display: 'Dancing Script', family: "'Dancing Script', cursive" },
+  { name: 'Satisfy', display: 'Satisfy', family: "'Satisfy', cursive" },
+  { name: 'Fredoka One', display: 'Fredoka One', family: "'Fredoka One', cursive" },
+  { name: 'Permanent Marker', display: 'Marker', family: "'Permanent Marker', cursive" },
+  { name: 'Raleway', display: 'Raleway', family: "'Raleway', sans-serif" },
+  { name: 'DM Sans', display: 'DM Sans', family: "'DM Sans', sans-serif" },
+];
+
+const BTN_STYLE_OPTIONS = [
+  { id: 'pill', label: 'Pill', radius: '99px', outline: false },
+  { id: 'rounded', label: 'Rounded', radius: '16px', outline: false },
+  { id: 'square', label: 'Square', radius: '6px', outline: false },
+  { id: 'sharp', label: 'Sharp', radius: '0px', outline: false },
+  { id: 'outline-pill', label: 'Outline Pill', radius: '99px', outline: true },
+  { id: 'outline-rounded', label: 'Outline', radius: '16px', outline: true },
+  { id: 'shadow', label: 'Shadow', radius: '16px', shadow: true },
+  { id: 'brutalist', label: 'Brutalist', radius: '0px', brutalist: true },
+  { id: 'glass', label: 'Glass', radius: '16px', glass: true },
+];
+
+const ACCENT_COLORS = [
+  '#7c5cfc','#e040fb','#00e5ff','#00e676','#ff1744','#ffd740',
+  '#ff6d00','#64dd17','#00b0ff','#d500f9','#ffab00','#00bfa5',
+  '#ff4081','#40c4ff','#69f0ae','#eeff41','#ff6e40','#ea80fc',
+  '#ffffff','#000000','#cccccc','#888888','#ff5252','#1de9b6',
+];
+
 // ─── FULL TEMPLATE LIBRARY (1000+ templates) ─────────────────
-// Each template: id, name, category, css (inline styles for preview + live page)
 function generateTemplates() {
   const tpl = [];
   let id = 1;
@@ -197,10 +294,10 @@ function generateTemplates() {
 
   const btnStyles = [
     { radius: '99px', shadow: '0 4px 16px rgba(0,0,0,0.3)' },
-    { radius: '8px', shadow: '0 4px 12px rgba(0,0,0,0.2)' },
-    { radius: '0px', shadow: 'none', border: '2px solid' },
-    { radius: '4px', shadow: '4px 4px 0 rgba(0,0,0,0.8)', border: '2px solid' },
-    { radius: '16px', shadow: '0 8px 24px rgba(0,0,0,0.15)' },
+    { radius: '16px', shadow: '0 4px 12px rgba(0,0,0,0.2)' },
+    { radius: '6px', shadow: 'none', border: '2px solid' },
+    { radius: '0px', shadow: '4px 4px 0 rgba(0,0,0,0.8)', border: '2px solid' },
+    { radius: '20px', shadow: '0 8px 24px rgba(0,0,0,0.15)' },
     { radius: '2px', shadow: 'inset 0 0 0 2px', border: 'none' },
     { radius: '50px', shadow: '0 2px 8px rgba(0,0,0,0.2)', outline: true },
     { radius: '12px', shadow: '0 6px 20px rgba(0,0,0,0.25)' },
@@ -229,7 +326,7 @@ function generateTemplates() {
     'Skyline','Downtown','Uptown','Midtown','Suburb','Rooftop','Penthouse','Loft',
   ];
 
-  // Generate 1000+ unique templates by combining palettes × fonts × btnStyles
+  // Generate 1000+ unique templates
   let nameIdx = 0;
   for (let pi = 0; pi < palettes.length; pi++) {
     for (let fi = 0; fi < fontPairs.length; fi++) {
@@ -298,75 +395,6 @@ function generatePreviewGradient(p) {
   return `linear-gradient(160deg, ${p.bg} 0%, ${acc}33 100%)`;
 }
 
-// ─── ICONS ────────────────────────────────────────────────────
-const POPULAR_ICONS = [
-  '🔗','🌐','📱','💻','🎵','🎬','📸','✉️','📧','💌',
-  '🐦','🎯','🎮','📝','📚','🎨','🏆','💡','🔥','⭐',
-  '💎','🚀','🌟','🎪','🎭','🎤','🎧','📺','🖥️','📡',
-  '🛒','💰','🎁','🏠','🚗','✈️','🌍','🌎','🌏','❤️',
-  '💙','💚','💜','🧡','💛','🤍','🖤','🤎','💗','💖',
-  '👤','👥','🤝','💪','🙌','👏','✌️','🤙','👌','🔑',
-  '🔒','🔓','⚙️','🛠️','📊','📈','📉','💹','🗓️','⏰',
-  '📌','📍','🗺️','🧭','🏅','🥇','🥈','🥉','🎖️','🏵️',
-];
-
-const SOCIAL_PRESETS = [
-  { icon:'🐦', label:'Twitter/X', prefix:'https://x.com/' },
-  { icon:'📘', label:'Facebook', prefix:'https://facebook.com/' },
-  { icon:'📷', label:'Instagram', prefix:'https://instagram.com/' },
-  { icon:'▶️', label:'YouTube', prefix:'https://youtube.com/@' },
-  { icon:'💼', label:'LinkedIn', prefix:'https://linkedin.com/in/' },
-  { icon:'🎵', label:'TikTok', prefix:'https://tiktok.com/@' },
-  { icon:'🎮', label:'Twitch', prefix:'https://twitch.tv/' },
-  { icon:'🐙', label:'GitHub', prefix:'https://github.com/' },
-  { icon:'📌', label:'Pinterest', prefix:'https://pinterest.com/' },
-  { icon:'📸', label:'Snapchat', prefix:'https://snapchat.com/add/' },
-  { icon:'💬', label:'WhatsApp', prefix:'https://wa.me/' },
-  { icon:'✈️', label:'Telegram', prefix:'https://t.me/' },
-  { icon:'🎶', label:'Spotify', prefix:'https://open.spotify.com/user/' },
-  { icon:'🔗', label:'Website', prefix:'https://' },
-  { icon:'📧', label:'Email', prefix:'mailto:' },
-  { icon:'📱', label:'LINE', prefix:'https://line.me/' },
-];
-
-const FONT_OPTIONS = [
-  { name: 'Syne', display: 'Syne', family: "'Syne', sans-serif" },
-  { name: 'Playfair Display', display: 'Playfair', family: "'Playfair Display', serif" },
-  { name: 'Bebas Neue', display: 'BEBAS NEUE', family: "'Bebas Neue', cursive" },
-  { name: 'Abril Fatface', display: 'Abril Fatface', family: "'Abril Fatface', cursive" },
-  { name: 'Josefin Sans', display: 'Josefin Sans', family: "'Josefin Sans', sans-serif" },
-  { name: 'Cinzel', display: 'Cinzel', family: "'Cinzel', serif" },
-  { name: 'Space Mono', display: 'Space Mono', family: "'Space Mono', monospace" },
-  { name: 'Righteous', display: 'Righteous', family: "'Righteous', cursive" },
-  { name: 'Lobster', display: 'Lobster', family: "'Lobster', cursive" },
-  { name: 'Pacifico', display: 'Pacifico', family: "'Pacifico', cursive" },
-  { name: 'Dancing Script', display: 'Dancing Script', family: "'Dancing Script', cursive" },
-  { name: 'Satisfy', display: 'Satisfy', family: "'Satisfy', cursive" },
-  { name: 'Fredoka One', display: 'Fredoka One', family: "'Fredoka One', cursive" },
-  { name: 'Permanent Marker', display: 'Marker', family: "'Permanent Marker', cursive" },
-  { name: 'Raleway', display: 'Raleway', family: "'Raleway', sans-serif" },
-  { name: 'DM Sans', display: 'DM Sans', family: "'DM Sans', sans-serif" },
-];
-
-const BTN_STYLE_OPTIONS = [
-  { id: 'pill', label: 'Pill', radius: '99px', outline: false },
-  { id: 'rounded', label: 'Rounded', radius: '12px', outline: false },
-  { id: 'square', label: 'Square', radius: '4px', outline: false },
-  { id: 'sharp', label: 'Sharp', radius: '0px', outline: false },
-  { id: 'outline-pill', label: 'Outline Pill', radius: '99px', outline: true },
-  { id: 'outline-rounded', label: 'Outline', radius: '12px', outline: true },
-  { id: 'shadow', label: 'Shadow', radius: '12px', shadow: true },
-  { id: 'brutalist', label: 'Brutalist', radius: '0px', brutalist: true },
-  { id: 'glass', label: 'Glass', radius: '12px', glass: true },
-];
-
-const ACCENT_COLORS = [
-  '#7c5cfc','#e040fb','#00e5ff','#00e676','#ff1744','#ffd740',
-  '#ff6d00','#64dd17','#00b0ff','#d500f9','#ffab00','#00bfa5',
-  '#ff4081','#40c4ff','#69f0ae','#eeff41','#ff6e40','#ea80fc',
-  '#ffffff','#000000','#cccccc','#888888','#ff5252','#1de9b6',
-];
-
 // ─── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   allTemplates = generateTemplates();
@@ -375,7 +403,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function initApp() {
   // Check session
-  const session = localStorage.getItem('oratree_session');
+  const session = localStorage.getItem('alnyftree_session');
   if (session) {
     try {
       const s = JSON.parse(session);
@@ -390,7 +418,7 @@ async function initApp() {
         showPage('dashboard');
         loadDashboard();
       } else {
-        localStorage.removeItem('oratree_session');
+        localStorage.removeItem('alnyftree_session');
         showPage('landing');
       }
     } catch {
@@ -444,7 +472,7 @@ async function handleLogin() {
   // Admin
   if (username === 'administrator' && password === 'Rantauprapat123') {
     currentUser = { username: 'administrator', role: 'admin', display: 'Administrator' };
-    localStorage.setItem('oratree_session', JSON.stringify(currentUser));
+    localStorage.setItem('alnyftree_session', JSON.stringify(currentUser));
     hideAuthModal();
     toast('Selamat datang, Admin! 👑', 'success');
     showPage('dashboard');
@@ -461,7 +489,7 @@ async function handleLogin() {
 
   if (error || !data) { toast('Username atau password salah', 'error'); return; }
   currentUser = { username: data.username, role: 'user', display: data.display_name || data.username };
-  localStorage.setItem('oratree_session', JSON.stringify(currentUser));
+  localStorage.setItem('alnyftree_session', JSON.stringify(currentUser));
   hideAuthModal();
   toast(`Selamat datang, ${currentUser.display}! 🎉`, 'success');
   showPage('dashboard');
@@ -501,7 +529,7 @@ async function handleRegister() {
 
   if (error) { toast('Gagal mendaftar: ' + error.message, 'error'); return; }
   currentUser = { username, role: 'user', display };
-  localStorage.setItem('oratree_session', JSON.stringify(currentUser));
+  localStorage.setItem('alnyftree_session', JSON.stringify(currentUser));
   hideAuthModal();
   toast('Akun berhasil dibuat! 🎉', 'success');
   showPage('dashboard');
@@ -511,7 +539,7 @@ async function handleRegister() {
 function logout() {
   currentUser = null;
   currentProfile = null;
-  localStorage.removeItem('oratree_session');
+  localStorage.removeItem('alnyftree_session');
   showPage('landing');
   toast('Berhasil logout', 'info');
 }
@@ -535,7 +563,7 @@ function updateNavUser() {
     <div class="nav-user">
       <div class="nav-avatar">${currentUser.display.charAt(0).toUpperCase()}</div>
       <span>${currentUser.display}</span>
-      <button class="nav-btn" onclick="logout()">Logout</button>
+      <button class="nav-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </div>
   `;
 }
@@ -545,31 +573,31 @@ function showUserSidebar() {
     <div class="sidebar-section">
       <div class="sidebar-label">Menu</div>
       <button class="sidebar-item active" onclick="showDashSection('overview')" data-sec="overview">
-        <span class="icon">🏠</span> Overview
+        <span class="icon"><i class="fas fa-home"></i></span> Overview
       </button>
       <button class="sidebar-item" onclick="showDashSection('links')" data-sec="links">
-        <span class="icon">🔗</span> Links Saya
+        <span class="icon"><i class="fas fa-link"></i></span> Links Saya
       </button>
       <button class="sidebar-item" onclick="showDashSection('templates')" data-sec="templates">
-        <span class="icon">🎨</span> Template
+        <span class="icon"><i class="fas fa-paint-roller"></i></span> Template
       </button>
       <button class="sidebar-item" onclick="showDashSection('design')" data-sec="design">
-        <span class="icon">✏️</span> Desain
+        <span class="icon"><i class="fas fa-pen-fancy"></i></span> Desain
       </button>
       <button class="sidebar-item" onclick="showDashSection('music')" data-sec="music">
-        <span class="icon">🎵</span> Musik
+        <span class="icon"><i class="fas fa-music"></i></span> Musik
       </button>
       <button class="sidebar-item" onclick="showDashSection('profile')" data-sec="profile">
-        <span class="icon">👤</span> Profil
+        <span class="icon"><i class="fas fa-user"></i></span> Profil
       </button>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">Support</div>
       <button class="sidebar-item" onclick="showDashSection('complaint')" data-sec="complaint">
-        <span class="icon">💬</span> Keluhan / Saran
+        <span class="icon"><i class="fas fa-comment"></i></span> Keluhan / Saran
       </button>
       <button class="sidebar-item" onclick="openPreview()">
-        <span class="icon">👁️</span> Preview
+        <span class="icon"><i class="fas fa-eye"></i></span> Preview
       </button>
     </div>
   `;
@@ -580,20 +608,20 @@ function showAdminSidebar() {
     <div class="sidebar-section">
       <div class="sidebar-label">Admin Panel</div>
       <button class="sidebar-item active" onclick="showDashSection('admin-overview')" data-sec="admin-overview">
-        <span class="icon">📊</span> Dashboard
+        <span class="icon"><i class="fas fa-chart-bar"></i></span> Dashboard
       </button>
       <button class="sidebar-item" onclick="showDashSection('admin-users')" data-sec="admin-users">
-        <span class="icon">👥</span> Pengguna
+        <span class="icon"><i class="fas fa-users"></i></span> Pengguna
       </button>
       <button class="sidebar-item" onclick="showDashSection('admin-tickets')" data-sec="admin-tickets">
-        <span class="icon">🎫</span> Keluhan
+        <span class="icon"><i class="fas fa-ticket-alt"></i></span> Keluhan
         <span class="sidebar-badge" id="ticket-badge">0</span>
       </button>
       <button class="sidebar-item" onclick="showDashSection('admin-songs')" data-sec="admin-songs">
-        <span class="icon">🎵</span> Kelola Lagu
+        <span class="icon"><i class="fas fa-headphones"></i></span> Kelola Lagu
       </button>
       <button class="sidebar-item" onclick="showDashSection('admin-links')" data-sec="admin-links">
-        <span class="icon">🔗</span> Semua Link
+        <span class="icon"><i class="fas fa-link"></i></span> Semua Link
       </button>
     </div>
   `;
@@ -653,46 +681,46 @@ function loadOverview() {
       <div class="section-sub">Kelola dan kustomisasi linktree-mu</div>
     </div>
     <div class="publish-bar">
-      <span style="font-size:14px;font-weight:600;color:var(--text2);">Link Publikmu:</span>
-      <div class="publish-url">https://oratree.vercel.app/${currentUser.username}</div>
-      <button class="btn btn-primary btn-sm" onclick="copyLink()">📋 Salin</button>
-      <button class="btn btn-secondary btn-sm" onclick="openPreview()">👁️ Preview</button>
-      <a class="btn btn-secondary btn-sm" href="/${currentUser.username}" target="_blank">🚀 Buka</a>
+      <span style="font-size:14px;font-weight:600;color:var(--text2);"><i class="fas fa-link"></i> Link Publikmu:</span>
+      <div class="publish-url">https://alnyftree.vercel.app/${currentUser.username}</div>
+      <button class="btn btn-primary btn-sm" onclick="copyLink()"><i class="fas fa-copy"></i> Salin</button>
+      <button class="btn btn-secondary btn-sm" onclick="openPreview()"><i class="fas fa-eye"></i> Preview</button>
+      <a class="btn btn-secondary btn-sm" href="/${currentUser.username}" target="_blank"><i class="fas fa-external-link-alt"></i> Buka</a>
     </div>
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-card-icon">🔗</div>
+        <div class="stat-card-icon"><i class="fas fa-link"></i></div>
         <div class="stat-card-num">${links.length}</div>
         <div class="stat-card-label">Total Link</div>
       </div>
       <div class="stat-card">
-        <div class="stat-card-icon">🎨</div>
+        <div class="stat-card-icon"><i class="fas fa-paint-roller"></i></div>
         <div class="stat-card-num">${tpl ? tpl.name : '-'}</div>
         <div class="stat-card-label">Template Aktif</div>
       </div>
       <div class="stat-card">
-        <div class="stat-card-icon">🎵</div>
-        <div class="stat-card-num">${currentProfile.music ? '🟢' : '⚪'}</div>
+        <div class="stat-card-icon"><i class="fas fa-music"></i></div>
+        <div class="stat-card-num">${currentProfile.music ? '<i class="fas fa-check-circle" style="color:var(--green);"></i>' : '<i class="fas fa-times-circle" style="color:var(--red);"></i>'}</div>
         <div class="stat-card-label">Musik</div>
       </div>
       <div class="stat-card">
-        <div class="stat-card-icon">👤</div>
+        <div class="stat-card-icon"><i class="fas fa-user"></i></div>
         <div class="stat-card-num">${currentProfile.display_name || '-'}</div>
         <div class="stat-card-label">Display Name</div>
       </div>
     </div>
     <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;">
-      <div style="flex:1;min-width:280px;">
-        <h3 style="font-family:var(--font-main);margin-bottom:16px;">Link Terbaru</h3>
+      <div style="flex:1;min-width:300px;">
+        <h3 style="font-family:var(--font-main);margin-bottom:16px;"><i class="fas fa-link"></i> Link Terbaru</h3>
         ${links.slice(0,3).map(l => `
-          <div class="link-item" style="margin-bottom:10px;">
-            <div class="link-icon-box">${l.icon || '🔗'}</div>
+          <div class="link-item" style="margin-bottom:12px;">
+            <div class="link-icon-box">${l.icon ? (l.icon.includes('fa-') ? `<i class="${l.icon}"></i>` : l.icon) : '<i class="fas fa-link"></i>'}</div>
             <div class="link-info">
               <div class="link-title">${l.title}</div>
               <div class="link-url">${l.url}</div>
             </div>
           </div>
-        `).join('') || '<div style="color:var(--text2);font-size:14px;">Belum ada link. <button class="btn btn-primary btn-sm" onclick="showDashSection(\'links\')">Tambah Sekarang</button></div>'}
+        `).join('') || '<div style="color:var(--text2);font-size:14px;">Belum ada link. <button class="btn btn-primary btn-sm" onclick="showDashSection(\'links\')"><i class="fas fa-plus"></i> Tambah Sekarang</button></div>'}
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
         <h3 style="font-family:var(--font-main);">Preview</h3>
@@ -706,7 +734,7 @@ function loadOverview() {
 }
 
 function copyLink() {
-  navigator.clipboard.writeText(`https://oratree.vercel.app/${currentUser.username}`);
+  navigator.clipboard.writeText(`https://alnyftree.vercel.app/${currentUser.username}`);
   toast('Link disalin! 🎉', 'success');
 }
 function openPreview() {
@@ -720,10 +748,10 @@ function loadLinks() {
   document.getElementById('dash-links').innerHTML = `
     <div class="section-header flex justify-between items-center">
       <div>
-        <div class="section-title">Links Saya</div>
+        <div class="section-title"><i class="fas fa-link"></i> Links Saya</div>
         <div class="section-sub">${links.length} link aktif</div>
       </div>
-      <button class="btn btn-primary" onclick="showAddLinkModal()">+ Tambah Link</button>
+      <button class="btn btn-primary" onclick="showAddLinkModal()"><i class="fas fa-plus"></i> Tambah Link</button>
     </div>
     <div class="link-list" id="link-list-container">
       ${links.length === 0 ? '<div style="text-align:center;padding:60px;color:var(--text2);">Belum ada link. Klik tombol di atas untuk menambah! 🔗</div>' : links.map((l, i) => renderLinkItem(l, i)).join('')}
@@ -735,8 +763,8 @@ function loadLinks() {
 function renderLinkItem(l, i) {
   return `
     <div class="link-item" draggable="true" data-idx="${i}" data-id="${l.id}">
-      <span class="link-drag">⠿</span>
-      <div class="link-icon-box">${l.icon || '🔗'}</div>
+      <span class="link-drag"><i class="fas fa-grip-vertical"></i></span>
+      <div class="link-icon-box">${l.icon ? (l.icon.includes('fa-') ? `<i class="${l.icon}"></i>` : l.icon) : '<i class="fas fa-link"></i>'}</div>
       <div class="link-info">
         <div class="link-title">${l.title}</div>
         <div class="link-url">${l.url}</div>
@@ -746,8 +774,8 @@ function renderLinkItem(l, i) {
         <span class="toggle-slider"></span>
       </label>
       <div class="link-actions">
-        <button class="btn btn-ghost btn-xs" onclick="showEditLinkModal('${l.id}')">✏️</button>
-        <button class="btn btn-danger btn-xs" onclick="deleteLink('${l.id}')">🗑️</button>
+        <button class="btn btn-ghost btn-xs" onclick="showEditLinkModal('${l.id}')"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-danger btn-xs" onclick="deleteLink('${l.id}')"><i class="fas fa-trash"></i></button>
       </div>
     </div>
   `;
@@ -780,13 +808,14 @@ function initDragDrop() {
 
 function showAddLinkModal() {
   editingLinkId = null;
-  selectedIconEmoji = '🔗';
+  selectedIcon = 'fas fa-link';
   document.getElementById('link-modal-title').textContent = 'Tambah Link Baru';
   document.getElementById('link-title-input').value = '';
   document.getElementById('link-url-input').value = '';
-  document.getElementById('link-icon-display').textContent = '🔗';
+  document.getElementById('link-icon-display').innerHTML = '<i class="fas fa-link"></i>';
   document.getElementById('link-modal').classList.remove('hidden');
   renderIconPicker();
+  renderEmojiPicker();
   renderSocialPresets();
 }
 
@@ -794,32 +823,40 @@ function showEditLinkModal(id) {
   const link = (currentProfile.links || []).find(l => l.id === id);
   if (!link) return;
   editingLinkId = id;
-  selectedIconEmoji = link.icon || '🔗';
+  selectedIcon = link.icon || 'fas fa-link';
   document.getElementById('link-modal-title').textContent = 'Edit Link';
   document.getElementById('link-title-input').value = link.title;
   document.getElementById('link-url-input').value = link.url;
-  document.getElementById('link-icon-display').textContent = link.icon || '🔗';
+  document.getElementById('link-icon-display').innerHTML = link.icon ? (link.icon.includes('fa-') ? `<i class="${link.icon}"></i>` : link.icon) : '<i class="fas fa-link"></i>';
   document.getElementById('link-modal').classList.remove('hidden');
   renderIconPicker();
+  renderEmojiPicker();
   renderSocialPresets();
 }
 
 function renderIconPicker() {
-  document.getElementById('icon-grid').innerHTML = POPULAR_ICONS.map(ic => `
-    <div class="icon-option ${ic === selectedIconEmoji ? 'selected' : ''}" onclick="selectIcon('${ic}')">${ic}</div>
+  document.getElementById('icon-grid').innerHTML = FONT_AWESOME_ICONS.map(ic => `
+    <div class="icon-option ${ic === selectedIcon ? 'selected' : ''}" onclick="selectIcon('${ic}')"><i class="${ic}"></i></div>
+  `).join('');
+}
+
+function renderEmojiPicker() {
+  document.getElementById('emoji-grid').innerHTML = EMOJI_ICONS.map(emoji => `
+    <div class="emoji-option ${emoji === selectedIcon ? 'selected' : ''}" onclick="selectIcon('${emoji}')">${emoji}</div>
   `).join('');
 }
 
 function selectIcon(ic) {
-  selectedIconEmoji = ic;
-  document.getElementById('link-icon-display').textContent = ic;
+  selectedIcon = ic;
+  document.getElementById('link-icon-display').innerHTML = ic.includes('fa-') ? `<i class="${ic}"></i>` : ic;
   renderIconPicker();
+  renderEmojiPicker();
 }
 
 function renderSocialPresets() {
   document.getElementById('social-preset-grid').innerHTML = SOCIAL_PRESETS.map(s => `
     <div class="social-preset" onclick="applySocialPreset('${s.prefix}','${s.label}','${s.icon}')">
-      <span class="s-icon">${s.icon}</span>${s.label}
+      <span class="s-icon"><i class="${s.icon}"></i></span>${s.label}
     </div>
   `).join('');
 }
@@ -827,9 +864,10 @@ function renderSocialPresets() {
 function applySocialPreset(prefix, label, icon) {
   document.getElementById('link-title-input').value = label;
   document.getElementById('link-url-input').value = prefix;
-  selectedIconEmoji = icon;
-  document.getElementById('link-icon-display').textContent = icon;
+  selectedIcon = icon;
+  document.getElementById('link-icon-display').innerHTML = `<i class="${icon}"></i>`;
   renderIconPicker();
+  renderEmojiPicker();
 }
 
 async function saveLinkModal() {
@@ -840,9 +878,9 @@ async function saveLinkModal() {
   const links = [...(currentProfile.links || [])];
   if (editingLinkId) {
     const idx = links.findIndex(l => l.id === editingLinkId);
-    if (idx !== -1) links[idx] = { ...links[idx], title, url, icon: selectedIconEmoji };
+    if (idx !== -1) links[idx] = { ...links[idx], title, url, icon: selectedIcon };
   } else {
-    links.push({ id: Date.now().toString(), title, url, icon: selectedIconEmoji, active: true });
+    links.push({ id: Date.now().toString(), title, url, icon: selectedIcon, active: true });
   }
   currentProfile.links = links;
   await saveLinks();
@@ -885,7 +923,7 @@ function renderTemplateGallery() {
 
   container.innerHTML = `
     <div class="section-header">
-      <div class="section-title">Pilih Template</div>
+      <div class="section-title"><i class="fas fa-paint-roller"></i> Pilih Template</div>
       <div class="section-sub">${filtered.length} template tersedia dari ${allTemplates.length}+ koleksi</div>
     </div>
     <div class="template-filters">
@@ -900,13 +938,13 @@ function renderTemplateGallery() {
       ${paginated.map(t => renderTemplateCard(t, selectedId === t.id)).join('')}
     </div>
     <div class="pagination">
-      <button class="page-btn" onclick="changeTplPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹</button>
+      <button class="page-btn" onclick="changeTplPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>
       ${Array.from({length: Math.min(7, totalPages)}, (_, i) => {
         let p = currentPage <= 4 ? i + 1 : currentPage - 3 + i;
         if (p > totalPages) return '';
         return `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="changeTplPage(${p})">${p}</button>`;
       }).join('')}
-      <button class="page-btn" onclick="changeTplPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>›</button>
+      <button class="page-btn" onclick="changeTplPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>
     </div>
   `;
 }
@@ -918,7 +956,6 @@ function renderTemplateCard(t, selected) {
   return `
     <div class="template-card ${selected ? 'selected' : ''}" onclick="selectTemplate(${t.id})">
       <div class="template-preview" style="background:${bgStyle};">
-        <!-- Mini linktree preview -->
         <div style="display:flex;flex-direction:column;align-items:center;padding:16px 10px;height:100%;font-family:${t.font.heading};">
           <div style="width:36px;height:36px;border-radius:50%;background:${acc};margin-bottom:6px;flex-shrink:0;"></div>
           <div style="font-size:10px;font-weight:700;color:${pal.text};margin-bottom:2px;text-align:center;white-space:nowrap;overflow:hidden;width:100%;text-overflow:ellipsis;">${t.name}</div>
@@ -929,7 +966,7 @@ function renderTemplateCard(t, selected) {
         </div>
       </div>
       <div class="template-overlay"><div class="template-name">${t.name}</div></div>
-      <div class="template-selected-badge">✓</div>
+      <div class="template-selected-badge"><i class="fas fa-check"></i></div>
     </div>
   `;
 }
@@ -972,21 +1009,21 @@ function renderDesignPanel() {
 
   document.getElementById('dash-design').innerHTML = `
     <div class="section-header">
-      <div class="section-title">Desain Linktree</div>
+      <div class="section-title"><i class="fas fa-pen-fancy"></i> Desain Linktree</div>
       <div class="section-sub">Kustomisasi tampilan sesuai keinginanmu</div>
     </div>
     <div style="display:flex;gap:32px;flex-wrap:wrap;">
-      <div style="flex:1;min-width:280px;">
+      <div style="flex:1;min-width:300px;">
         <div class="tabs-row">
-          <div class="tab-item active" onclick="switchDesignTab('colors',this)">🎨 Warna</div>
-          <div class="tab-item" onclick="switchDesignTab('fonts',this)">✏️ Font</div>
-          <div class="tab-item" onclick="switchDesignTab('buttons',this)">🔘 Tombol</div>
-          <div class="tab-item" onclick="switchDesignTab('avatar',this)">👤 Avatar</div>
+          <div class="tab-item active" onclick="switchDesignTab('colors',this)"><i class="fas fa-palette"></i> Warna</div>
+          <div class="tab-item" onclick="switchDesignTab('fonts',this)"><i class="fas fa-font"></i> Font</div>
+          <div class="tab-item" onclick="switchDesignTab('buttons',this)"><i class="fas fa-square"></i> Tombol</div>
+          <div class="tab-item" onclick="switchDesignTab('avatar',this)"><i class="fas fa-user-circle"></i> Avatar</div>
         </div>
         <div class="tab-panels">
           <div class="tab-panel active" id="design-tab-colors">
             <div class="form-group">
-              <label class="form-label">Warna Aksen</label>
+              <label class="form-label"><i class="fas fa-palette"></i> Warna Aksen</label>
               <div class="color-swatches">
                 ${ACCENT_COLORS.map(c => `
                   <div class="color-swatch ${currentAccent === c ? 'selected' : ''}" style="background:${c};" onclick="setAccentColor('${c}')"></div>
@@ -998,11 +1035,11 @@ function renderDesignPanel() {
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label">Warna Background Custom</label>
+                            <label class="form-label"><i class="fas fa-image"></i> Warna Background Custom</label>
               <div class="flex items-center gap-8">
                 <input type="color" value="${currentBg || '#0a0a0f'}" oninput="setCustomBg(this.value)" style="width:48px;height:36px;border:none;background:none;cursor:pointer;border-radius:8px;">
                 <input class="form-input" placeholder="#hex atau CSS gradient" value="${currentBg}" oninput="setCustomBg(this.value)" style="flex:1;">
-                <button class="btn btn-ghost btn-sm" onclick="setCustomBg('')">Reset</button>
+                <button class="btn btn-ghost btn-sm" onclick="setCustomBg('')"><i class="fas fa-undo"></i> Reset</button>
               </div>
             </div>
           </div>
@@ -1028,14 +1065,17 @@ function renderDesignPanel() {
           </div>
           <div class="tab-panel" id="design-tab-avatar">
             <div class="form-group">
-              <label class="form-label">URL Avatar / Foto Profil</label>
-              <input class="form-input" id="avatar-url-input" placeholder="https://..." value="${currentProfile?.avatar || ''}">
-              <button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="saveAvatar()">Simpan Avatar</button>
+              <label class="form-label"><i class="fas fa-camera"></i> URL Avatar / Foto Profil</label>
+              <div class="flex gap-8" style="margin-bottom:8px;">
+                <input class="form-input" id="avatar-url-input" placeholder="https://..." value="${currentProfile?.avatar || ''}" style="flex:1;">
+                <button class="btn btn-primary" onclick="showUploadAvatarModal()"><i class="fas fa-upload"></i> Upload</button>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="saveAvatar()"><i class="fas fa-save"></i> Simpan Avatar</button>
             </div>
             <div class="form-group">
-              <label class="form-label">Bio / Deskripsi</label>
+              <label class="form-label"><i class="fas fa-pencil-alt"></i> Bio / Deskripsi</label>
               <textarea class="form-textarea" id="bio-input" placeholder="Tulis bio singkatmu...">${currentProfile?.bio || ''}</textarea>
-              <button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="saveBio()">Simpan Bio</button>
+              <button class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="saveBio()"><i class="fas fa-save"></i> Simpan Bio</button>
             </div>
           </div>
         </div>
@@ -1046,7 +1086,7 @@ function renderDesignPanel() {
           <div class="preview-phone-notch"></div>
           <iframe class="preview-iframe" id="design-preview-frame" src="/${currentUser.username}?preview=1"></iframe>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="document.getElementById('design-preview-frame').src='/${currentUser.username}?preview=1&t='+Date.now()">🔄 Refresh</button>
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('design-preview-frame').src='/${currentUser.username}?preview=1&t='+Date.now()"><i class="fas fa-sync-alt"></i> Refresh</button>
       </div>
     </div>
   `;
@@ -1102,6 +1142,123 @@ async function saveBio() {
   toast('Bio disimpan!', 'success');
 }
 
+// ─── UPLOAD FUNCTIONS ─────────────────────────────────────────
+async function uploadAvatar() {
+  const fileInput = document.getElementById('avatar-file-input');
+  if (!fileInput.files || fileInput.files.length === 0) {
+    toast('Pilih file foto terlebih dahulu', 'error');
+    return;
+  }
+
+  const file = fileInput.files[0];
+  if (!file.type.startsWith('image/')) {
+    toast('File harus berupa gambar', 'error');
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    toast('Ukuran file maksimal 5MB', 'error');
+    return;
+  }
+
+  // Convert to base64 for demo (in production, upload to Supabase Storage)
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    const base64 = e.target.result;
+    currentProfile.avatar = base64;
+    await db.from('links_oratree').update({ avatar: base64 }).eq('type', 'user').eq('username', currentUser.username);
+    document.getElementById('upload-avatar-modal').classList.add('hidden');
+    toast('Avatar berhasil diupload!', 'success');
+    loadProfileSection();
+  };
+  reader.readAsDataURL(file);
+}
+
+async function uploadMusic() {
+  const title = document.getElementById('upload-song-title').value.trim();
+  const artist = document.getElementById('upload-song-artist').value.trim();
+  const musicFile = document.getElementById('music-file-input').files[0];
+  const coverFile = document.getElementById('music-cover-input').files[0];
+
+  if (!title || !artist) {
+    toast('Judul dan artis wajib diisi', 'error');
+    return;
+  }
+
+  if (!musicFile) {
+    toast('Pilih file audio terlebih dahulu', 'error');
+    return;
+  }
+
+  if (!musicFile.type.startsWith('audio/')) {
+    toast('File harus berupa audio', 'error');
+    return;
+  }
+
+  if (musicFile.size > 10 * 1024 * 1024) { // 10MB limit
+    toast('Ukuran file audio maksimal 10MB', 'error');
+    return;
+  }
+
+  // Convert to base64 for demo
+  const musicReader = new FileReader();
+  
+  musicReader.onload = async function(e) {
+    const musicBase64 = e.target.result;
+    
+    // Handle cover if exists
+    if (coverFile) {
+      const coverReader = new FileReader();
+      coverReader.onload = async function(ev) {
+        const coverBase64 = ev.target.result;
+        
+        const songData = {
+          id: Date.now().toString(),
+          title: title,
+          artist: artist,
+          url: musicBase64,
+          cover: coverBase64
+        };
+        
+        currentProfile.music = songData;
+        currentProfile.show_music = true;
+        
+        await db.from('links_oratree').update({ 
+          music: JSON.stringify(songData),
+          show_music: true 
+        }).eq('type', 'user').eq('username', currentUser.username);
+        
+        document.getElementById('upload-music-modal').classList.add('hidden');
+        toast('Lagu berhasil diupload! 🎵', 'success');
+        loadMusicSection();
+      };
+      coverReader.readAsDataURL(coverFile);
+    } else {
+      const songData = {
+        id: Date.now().toString(),
+        title: title,
+        artist: artist,
+        url: musicBase64,
+        cover: 'https://via.placeholder.com/80'
+      };
+      
+      currentProfile.music = songData;
+      currentProfile.show_music = true;
+      
+      await db.from('links_oratree').update({ 
+        music: JSON.stringify(songData),
+        show_music: true 
+      }).eq('type', 'user').eq('username', currentUser.username);
+      
+      document.getElementById('upload-music-modal').classList.add('hidden');
+      toast('Lagu berhasil diupload! 🎵', 'success');
+      loadMusicSection();
+    }
+  };
+  
+  musicReader.readAsDataURL(musicFile);
+}
+
 // ─── MUSIC SECTION ────────────────────────────────────────────
 async function loadMusicSection() {
   const { data: songs } = await db.from('links_oratree')
@@ -1110,21 +1267,22 @@ async function loadMusicSection() {
 
   document.getElementById('dash-music').innerHTML = `
     <div class="section-header">
-      <div class="section-title">🎵 Musik di Linktree</div>
+      <div class="section-title"><i class="fas fa-music"></i> Musik di Linktree</div>
       <div class="section-sub">Pilih lagu yang akan diputar di halaman linktreemu</div>
     </div>
-    <div class="form-group" style="margin-bottom:24px;">
+    <div class="publish-bar" style="margin-bottom:24px;">
       <label class="toggle-wrap">
         <label class="toggle">
           <input type="checkbox" id="show-music-toggle" ${currentProfile?.show_music ? 'checked' : ''} onchange="toggleShowMusic(this.checked)">
           <span class="toggle-slider"></span>
         </label>
-        <span style="font-weight:600;">Tampilkan tombol musik di linktree</span>
+        <span style="font-weight:600;"><i class="fas fa-music"></i> Tampilkan tombol musik di linktree</span>
       </label>
+      <button class="btn btn-primary" onclick="showUploadMusicModal()" style="margin-left:auto;"><i class="fas fa-upload"></i> Upload Lagu Sendiri</button>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;">
       <div class="song-card ${!currentMusicId ? 'selected' : ''}" onclick="selectMusic(null)" style="background:var(--surface);border:2px solid ${!currentMusicId ? 'var(--accent)' : 'var(--border)'};border-radius:var(--radius);padding:16px;cursor:pointer;text-align:center;">
-        <div style="font-size:40px;margin-bottom:8px;">🔕</div>
+        <div style="font-size:40px;margin-bottom:8px;"><i class="fas fa-volume-mute"></i></div>
         <div style="font-weight:600;font-size:14px;">Tidak Ada Musik</div>
       </div>
       ${(songs||[]).map(s => `
@@ -1156,32 +1314,36 @@ async function selectMusic(song) {
 function loadProfileSection() {
   document.getElementById('dash-profile').innerHTML = `
     <div class="section-header">
-      <div class="section-title">Pengaturan Profil</div>
+      <div class="section-title"><i class="fas fa-user-circle"></i> Pengaturan Profil</div>
     </div>
-    <div style="max-width:520px;">
+    <div style="max-width:560px;">
       <div class="form-group" style="text-align:center;">
         <div class="profile-avatar-wrap">
-          <img class="profile-avatar-img" src="${currentProfile?.avatar || 'https://ui-avatars.com/api/?name='+encodeURIComponent(currentProfile?.display_name||'U')+'&background=7c5cfc&color=fff&size=100'}" id="profile-avatar-img">
-          <button class="profile-avatar-edit" onclick="document.getElementById('profile-avatar-input').click()">✏️</button>
-          <input type="text" id="profile-avatar-input" class="form-input" placeholder="URL Avatar..." value="${currentProfile?.avatar||''}" style="margin-top:10px;">
+          <img class="profile-avatar-img" src="${currentProfile?.avatar || 'https://ui-avatars.com/api/?name='+encodeURIComponent(currentProfile?.display_name||'U')+'&background=7c5cfc&color=fff&size=120'}" id="profile-avatar-img">
+          <button class="profile-avatar-edit" onclick="showUploadAvatarModal()"><i class="fas fa-camera"></i></button>
+        </div>
+        <div style="margin-top:16px;">
+          <button class="btn btn-secondary btn-sm" onclick="showUploadAvatarModal()"><i class="fas fa-upload"></i> Upload Foto</button>
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Display Name</label>
+        <label class="form-label"><i class="fas fa-id-card"></i> Display Name</label>
         <input class="form-input" id="profile-display" value="${currentProfile?.display_name||''}">
       </div>
       <div class="form-group">
-        <label class="form-label">Bio</label>
+        <label class="form-label"><i class="fas fa-pencil-alt"></i> Bio</label>
         <textarea class="form-textarea" id="profile-bio">${currentProfile?.bio||''}</textarea>
       </div>
       <div class="form-group">
-        <label class="form-label">Username (= URL link kamu)</label>
+        <label class="form-label"><i class="fas fa-at"></i> Username (= URL link kamu)</label>
         <input class="form-input" value="${currentUser.username}" readonly style="opacity:0.5;cursor:not-allowed;">
         <small style="color:var(--text2);font-size:12px;">Username tidak bisa diubah</small>
       </div>
-      <button class="btn btn-primary" onclick="saveProfile()">💾 Simpan Profil</button>
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-primary" onclick="saveProfile()"><i class="fas fa-save"></i> Simpan Profil</button>
+      </div>
       <hr style="margin:32px 0;border-color:var(--border);">
-      <h3 style="font-family:var(--font-main);margin-bottom:20px;">🔐 Ganti Password</h3>
+      <h3 style="font-family:var(--font-main);margin-bottom:20px;"><i class="fas fa-lock"></i> Ganti Password</h3>
       <div class="form-group">
         <label class="form-label">Password Baru</label>
         <input class="form-input" type="password" id="new-password" placeholder="Minimal 6 karakter">
@@ -1190,7 +1352,7 @@ function loadProfileSection() {
         <label class="form-label">Konfirmasi Password</label>
         <input class="form-input" type="password" id="confirm-password">
       </div>
-      <button class="btn btn-secondary" onclick="changePassword()">🔐 Ganti Password</button>
+      <button class="btn btn-secondary" onclick="changePassword()"><i class="fas fa-key"></i> Ganti Password</button>
     </div>
   `;
 }
@@ -1198,15 +1360,15 @@ function loadProfileSection() {
 async function saveProfile() {
   const display = document.getElementById('profile-display').value.trim();
   const bio = document.getElementById('profile-bio').value.trim();
-  const avatar = document.getElementById('profile-avatar-input').value.trim();
   if (!display) { toast('Display name wajib diisi', 'error'); return; }
-  await db.from('links_oratree').update({ display_name: display, bio, avatar })
+  
+  await db.from('links_oratree').update({ display_name: display, bio })
     .eq('type', 'user').eq('username', currentUser.username);
+  
   currentProfile.display_name = display;
   currentProfile.bio = bio;
-  currentProfile.avatar = avatar;
   currentUser.display = display;
-  localStorage.setItem('oratree_session', JSON.stringify(currentUser));
+  localStorage.setItem('alnyftree_session', JSON.stringify(currentUser));
   updateNavUser();
   toast('Profil disimpan! 🎉', 'success');
 }
@@ -1226,23 +1388,23 @@ async function changePassword() {
 function loadComplaintSection() {
   document.getElementById('dash-complaint').innerHTML = `
     <div class="section-header">
-      <div class="section-title">💬 Keluhan & Saran</div>
+      <div class="section-title"><i class="fas fa-comment"></i> Keluhan & Saran</div>
       <div class="section-sub">Sampaikan kritik, saran, atau minta bantuan kepada admin</div>
     </div>
-    <div style="max-width:520px;">
+    <div style="max-width:560px;">
       <div class="form-group">
         <label class="form-label">Jenis Pesan</label>
         <div class="complaint-types">
-          <button class="complaint-type-btn selected" onclick="setComplainType('saran',this)">💡 Saran</button>
-          <button class="complaint-type-btn" onclick="setComplainType('kritik',this)">⚠️ Kritik</button>
-          <button class="complaint-type-btn" onclick="setComplainType('bantuan',this)">🆘 Bantuan</button>
+          <button class="complaint-type-btn selected" onclick="setComplainType('saran',this)"><i class="fas fa-lightbulb"></i> Saran</button>
+          <button class="complaint-type-btn" onclick="setComplainType('kritik',this)"><i class="fas fa-exclamation-triangle"></i> Kritik</button>
+          <button class="complaint-type-btn" onclick="setComplainType('bantuan',this)"><i class="fas fa-question-circle"></i> Bantuan</button>
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">Pesan</label>
         <textarea class="form-textarea" id="complaint-msg" placeholder="Tulis pesanmu di sini..." style="min-height:140px;"></textarea>
       </div>
-      <button class="btn btn-primary" onclick="submitComplaint()">📤 Kirim Pesan</button>
+      <button class="btn btn-primary" onclick="submitComplaint()"><i class="fas fa-paper-plane"></i> Kirim Pesan</button>
     </div>
   `;
   complainType = 'saran';
@@ -1282,15 +1444,15 @@ async function loadAdminDashboard() {
 
   document.getElementById('dash-admin-overview').innerHTML = `
     <div class="section-header">
-      <div class="section-title">👑 Admin Dashboard</div>
+      <div class="section-title"><i class="fas fa-crown"></i> Admin Dashboard</div>
       <div class="section-sub">Kontrol penuh semua pengguna dan konten</div>
     </div>
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-card-icon">👥</div><div class="stat-card-num">${(users||[]).length}</div><div class="stat-card-label">Total Pengguna</div></div>
-      <div class="stat-card"><div class="stat-card-icon">🔗</div><div class="stat-card-num">${allLinks}</div><div class="stat-card-label">Total Link</div></div>
-      <div class="stat-card"><div class="stat-card-icon">🎫</div><div class="stat-card-num">${(tickets||[]).length}</div><div class="stat-card-label">Tiket Terbuka</div></div>
-      <div class="stat-card"><div class="stat-card-icon">🎵</div><div class="stat-card-num">${(songs||[]).length}</div><div class="stat-card-label">Lagu Tersedia</div></div>
-      <div class="stat-card"><div class="stat-card-icon">🎨</div><div class="stat-card-num">${allTemplates.length}</div><div class="stat-card-label">Total Template</div></div>
+      <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-users"></i></div><div class="stat-card-num">${(users||[]).length}</div><div class="stat-card-label">Total Pengguna</div></div>
+      <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-link"></i></div><div class="stat-card-num">${allLinks}</div><div class="stat-card-label">Total Link</div></div>
+      <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-ticket-alt"></i></div><div class="stat-card-num">${(tickets||[]).length}</div><div class="stat-card-label">Tiket Terbuka</div></div>
+      <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-music"></i></div><div class="stat-card-num">${(songs||[]).length}</div><div class="stat-card-label">Lagu Tersedia</div></div>
+      <div class="stat-card"><div class="stat-card-icon"><i class="fas fa-paint-roller"></i></div><div class="stat-card-num">${allTemplates.length}</div><div class="stat-card-label">Total Template</div></div>
     </div>
   `;
 }
@@ -1300,7 +1462,7 @@ async function loadAdminUsers() {
   document.getElementById('dash-admin-users').innerHTML = `
     <div class="section-header flex justify-between items-center">
       <div>
-        <div class="section-title">👥 Semua Pengguna</div>
+        <div class="section-title"><i class="fas fa-users"></i> Semua Pengguna</div>
         <div class="section-sub">${(users||[]).length} pengguna terdaftar</div>
       </div>
     </div>
@@ -1318,11 +1480,11 @@ async function loadAdminUsers() {
               <td>${u.display_name||'-'}</td>
               <td>${safeJSON(u.links,[]).length}</td>
               <td>${u.created_at ? new Date(u.created_at).toLocaleDateString('id-ID') : '-'}</td>
-              <td><span class="user-status-badge badge-active">Aktif</span></td>
+              <td><span class="user-status-badge badge-active"><i class="fas fa-check-circle"></i> Aktif</span></td>
               <td style="display:flex;gap:6px;flex-wrap:wrap;">
-                <button class="btn btn-ghost btn-xs" onclick="adminEditUser('${u.username}')">✏️ Edit</button>
-                <button class="btn btn-ghost btn-xs" onclick="adminViewLinks('${u.username}')">🔗 Links</button>
-                <button class="btn btn-danger btn-xs" onclick="adminDeleteUser('${u.username}')">🗑️</button>
+                <button class="btn btn-ghost btn-xs" onclick="adminEditUser('${u.username}')"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-ghost btn-xs" onclick="adminViewLinks('${u.username}')"><i class="fas fa-link"></i></button>
+                <button class="btn btn-danger btn-xs" onclick="adminDeleteUser('${u.username}')"><i class="fas fa-trash"></i></button>
               </td>
             </tr>
           `).join('') || '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text2);">Belum ada pengguna</td></tr>'}
@@ -1374,10 +1536,10 @@ async function adminViewLinks(username) {
   const links = safeJSON(data.links, []);
   const html = links.map(l => `
     <div style="padding:12px;background:var(--surface2);border-radius:8px;margin-bottom:8px;display:flex;gap:10px;align-items:center;">
-      <span>${l.icon||'🔗'}</span>
-      <div>
+      <span>${l.icon ? (l.icon.includes('fa-') ? `<i class="${l.icon}"></i>` : l.icon) : '<i class="fas fa-link"></i>'}</span>
+      <div style="flex:1;">
         <div style="font-weight:600;font-size:14px;">${l.title}</div>
-        <div style="font-size:12px;color:var(--text2);">${l.url}</div>
+        <div style="font-size:12px;color:var(--text2);word-break:break-all;">${l.url}</div>
       </div>
     </div>
   `).join('') || '<div style="color:var(--text2);text-align:center;padding:20px;">Tidak ada link</div>';
@@ -1397,21 +1559,25 @@ async function loadAdminTickets() {
   if (badge) badge.textContent = open;
   document.getElementById('dash-admin-tickets').innerHTML = `
     <div class="section-header">
-      <div class="section-title">🎫 Keluhan & Saran</div>
+      <div class="section-title"><i class="fas fa-ticket-alt"></i> Keluhan & Saran</div>
       <div class="section-sub">${open} belum ditangani</div>
     </div>
     ${(tickets||[]).length === 0 ? '<div style="text-align:center;padding:60px;color:var(--text2);">Belum ada keluhan</div>' :
     (tickets||[]).map(t => `
       <div class="ticket-card">
         <div class="ticket-header">
-          <div class="ticket-user">@${t.username}</div>
-          <div class="ticket-time">${t.created_at ? new Date(t.created_at).toLocaleString('id-ID') : ''}</div>
+          <div class="ticket-user"><i class="fas fa-user"></i> @${t.username}</div>
+          <div class="ticket-time"><i class="fas fa-clock"></i> ${t.created_at ? new Date(t.created_at).toLocaleString('id-ID') : ''}</div>
         </div>
-        <span class="ticket-type ticket-${t.ticket_type}">${t.ticket_type === 'saran' ? '💡 Saran' : t.ticket_type === 'kritik' ? '⚠️ Kritik' : '🆘 Bantuan'}</span>
+        <span class="ticket-type ticket-${t.ticket_type}">
+          ${t.ticket_type === 'saran' ? '<i class="fas fa-lightbulb"></i> Saran' : 
+            t.ticket_type === 'kritik' ? '<i class="fas fa-exclamation-triangle"></i> Kritik' : 
+            '<i class="fas fa-question-circle"></i> Bantuan'}
+        </span>
         <div class="ticket-body">${t.message}</div>
         <div style="margin-top:10px;display:flex;gap:8px;">
-          ${t.status === 'open' ? `<button class="btn btn-success btn-xs" onclick="closeTicket('${t.id}')">✅ Tandai Selesai</button>` : '<span style="color:var(--green);font-size:12px;">✅ Selesai</span>'}
-          <button class="btn btn-danger btn-xs" onclick="deleteTicket('${t.id}')">🗑️ Hapus</button>
+          ${t.status === 'open' ? `<button class="btn btn-success btn-xs" onclick="closeTicket('${t.id}')"><i class="fas fa-check"></i> Tandai Selesai</button>` : '<span style="color:var(--green);font-size:12px;"><i class="fas fa-check-circle"></i> Selesai</span>'}
+          <button class="btn btn-danger btn-xs" onclick="deleteTicket('${t.id}')"><i class="fas fa-trash"></i> Hapus</button>
         </div>
       </div>
     `).join('')}
@@ -1434,10 +1600,10 @@ async function loadAdminSongs() {
   document.getElementById('dash-admin-songs').innerHTML = `
     <div class="section-header flex justify-between items-center">
       <div>
-        <div class="section-title">🎵 Kelola Lagu</div>
+        <div class="section-title"><i class="fas fa-headphones"></i> Kelola Lagu</div>
         <div class="section-sub">${(songs||[]).length} lagu tersedia</div>
       </div>
-      <button class="btn btn-primary" onclick="showAddSongModal()">+ Tambah Lagu</button>
+      <button class="btn btn-primary" onclick="showAddSongModal()"><i class="fas fa-plus"></i> Tambah Lagu</button>
     </div>
     <div class="song-admin-list">
       ${(songs||[]).map(s => `
@@ -1448,7 +1614,7 @@ async function loadAdminSongs() {
             <div class="song-admin-artist">${s.artist}</div>
             <div style="font-size:11px;color:var(--text2);margin-top:2px;">${s.audio_url}</div>
           </div>
-          <button class="btn btn-danger btn-xs" onclick="deleteSong('${s.id}')">🗑️</button>
+          <button class="btn btn-danger btn-xs" onclick="deleteSong('${s.id}')"><i class="fas fa-trash"></i></button>
         </div>
       `).join('') || '<div style="color:var(--text2);text-align:center;padding:40px;">Belum ada lagu. Tambah sekarang!</div>'}
     </div>
@@ -1498,7 +1664,7 @@ async function loadAdminLinks() {
   });
   document.getElementById('dash-admin-links').innerHTML = `
     <div class="section-header">
-      <div class="section-title">🔗 Semua Link</div>
+      <div class="section-title"><i class="fas fa-link"></i> Semua Link</div>
       <div class="section-sub">${allRows.length} link dari ${(users||[]).length} pengguna</div>
     </div>
     <div style="overflow-x:auto;">
@@ -1508,10 +1674,10 @@ async function loadAdminLinks() {
           ${allRows.map(l => `
             <tr>
               <td><a href="/${l.username}" target="_blank" style="color:var(--accent);">@${l.username}</a></td>
-              <td>${l.icon||'🔗'}</td>
+              <td>${l.icon ? (l.icon.includes('fa-') ? `<i class="${l.icon}"></i>` : l.icon) : '<i class="fas fa-link"></i>'}</td>
               <td>${l.title}</td>
               <td><a href="${l.url}" target="_blank" style="color:var(--accent3);font-size:12px;">${l.url.substring(0,40)}${l.url.length>40?'...':''}</a></td>
-              <td><span class="user-status-badge ${l.active!==false ? 'badge-active' : ''}">${l.active!==false ? 'Aktif' : 'Nonaktif'}</span></td>
+              <td><span class="user-status-badge ${l.active!==false ? 'badge-active' : ''}">${l.active!==false ? '<i class="fas fa-check-circle"></i> Aktif' : '<i class="fas fa-times-circle"></i> Nonaktif'}</span></td>
             </tr>
           `).join('') || '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text2);">Belum ada link</td></tr>'}
         </tbody>
@@ -1520,16 +1686,7 @@ async function loadAdminLinks() {
   `;
 }
 
-// ─── MUSIC PLAYER FAB ─────────────────────────────────────────
-let audioEl = null;
-function toggleMusicPanel() {
-  document.getElementById('music-panel').classList.toggle('open');
-}
-function closeMusicPanel() {
-  document.getElementById('music-panel').classList.remove('open');
-}
-
-// Expose functions to global scope
+// ─── EXPOSE FUNCTIONS TO GLOBAL ───────────────────────────────
 window.showAuthModal = showAuthModal;
 window.hideAuthModal = hideAuthModal;
 window.switchAuthTab = switchAuthTab;
@@ -1575,7 +1732,9 @@ window.deleteTicket = deleteTicket;
 window.showAddSongModal = showAddSongModal;
 window.saveSong = saveSong;
 window.deleteSong = deleteSong;
-window.toggleMusicPanel = toggleMusicPanel;
-window.closeMusicPanel = closeMusicPanel;
+window.showUploadAvatarModal = showUploadAvatarModal;
+window.showUploadMusicModal = showUploadMusicModal;
+window.uploadAvatar = uploadAvatar;
+window.uploadMusic = uploadMusic;
 window.allTemplates = allTemplates;
 window.safeJSON = safeJSON;
